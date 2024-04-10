@@ -23,8 +23,9 @@ Good user stories are ideally:
 ## Acceptance
 
 Please describe what is necessary for this ticket to count as resolved. You do not need to repeat the definition-of-done that your team has agreed on generally.
--[]
--[]
+
+- [ ] Task 1
+- [ ] Task 2
 
 ## Definition of Ready
 
