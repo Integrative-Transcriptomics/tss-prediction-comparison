@@ -3,7 +3,7 @@ import sys
 sys.path.append("..")
 from .JobStatus import JobStatus
 from .NotReadyException import NotReadyException
-from prediction.tssPredictor import tssPredictor
+from prediction.tssPredictor import tss_predictor
 
 
 class JobObject:
@@ -22,5 +22,5 @@ class JobObject:
             raise NotReadyException("Job is not done yet")
 
     def process(self):
-        self.return_object = tssPredictor(self.path)
+        self.return_object = tss_predictor(self.path)
         self.status = JobStatus.FINISHED

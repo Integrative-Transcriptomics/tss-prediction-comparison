@@ -24,13 +24,13 @@ def save_file(file):
         file.save(path)
         return file_name, path, file_extension
     else:
-        return None, None, None
+        return None, None, file_extension
 
 
 # returns jobid if known to registry, otherwise returns None
 def get_job_by_id(id_):
     if id_ in jobRegistry:
-        return jobRegistry[id]
+        return jobRegistry[id_]
     else:
         return None
 
@@ -96,7 +96,7 @@ def get_tss_by_id():
         job = get_job_by_id(id)
         if job:
             try:
-                return_object = job.getReturnObject()
+                return_object = job.get_return_object()
                 status_code = 200
                 response_object = jsonify(return_object)
             except NotReadyException as e:
