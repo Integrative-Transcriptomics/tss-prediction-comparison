@@ -1,21 +1,21 @@
-from .jobStatus import jobStatus
-from .NotReadyException import NotReadyException
+import uuid
 import sys
 sys.path.append("..")
+from .JobStatus import JobStatus
+from .NotReadyException import NotReadyException
 from prediction.tssPredictor import tssPredictor
 
-import uuid
 
-class jobObject:
+class JobObject:
     def __init__(self, filepath, name):
         self.name = name
         self.id = str(uuid.uuid4())
-        self.status = jobStatus.NOT_STARTED
+        self.status = JobStatus.NOT_STARTED
         self.path = filepath
         self.return_object = {}
 
-    def getReturnObject(self):
-        if(self.status == jobStatus.FINISHED):
+    def get_return_object(self):
+        if self.status == JobStatus.FINISHED:
 
             return self.return_object
         else:
@@ -23,6 +23,4 @@ class jobObject:
 
     def process(self):
         self.return_object = tssPredictor(self.path)
-        self.status = jobStatus.FINISHED
-
-
+        self.status = JobStatus.FINISHED

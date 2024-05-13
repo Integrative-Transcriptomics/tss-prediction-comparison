@@ -1,9 +1,9 @@
 import os
 import uuid
 from flask import Flask, request, jsonify, send_from_directory
-from api.allowedFileTypes import fileEndings
-from job.jobProcessor import jobProcessor
-from job.jobObject import jobObject
+from api.allowedFileTypes import FileEndings
+from job.jobProcessor import job_processor
+from job.JobObject import JobObject
 from job.NotReadyException import NotReadyException
 import threading
 import queue
@@ -18,7 +18,7 @@ jobRegistry = {}
 def save_file(file):
     _, file_extension = os.path.splitext(file.filename)
 
-    if fileEndings.has_value(file_extension.lower()):
+    if FileEndings.has_value(file_extension.lower()):
         file_name = str(uuid.uuid4())
         path = os.path.join(FILESTORE, file_name)
         file.save(path)
@@ -44,7 +44,7 @@ def upload_file():
         file_name, path, file_extension = save_file(file)
 
         if file_name:
-            job = jobObject(path, file_name)
+            job = JobObject(path, file_name)
             jobRegistry[job.id] = job
             jobQueue.put(job)
 
@@ -109,7 +109,7 @@ def get_tss_by_id():
 
 
 if __name__ == "__main__":
-    jobThread = threading.Thread(target=jobProcessor, args=(jobQueue,))
+    jobThread = threading.Thread(target=job_processor, args=(jobQueue,))
     jobThread.daemon = True
     jobThread.start()
     app.run(debug=True)
