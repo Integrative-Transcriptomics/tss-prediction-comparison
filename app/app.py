@@ -1,7 +1,6 @@
 import os
 import uuid
-from flask import Flask, request, render_template, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, send_from_directory
 from api.allowedFileTypes import fileEndings
 from job.jobProcessor import jobProcessor
 from job.jobObject import jobObject
@@ -10,119 +9,107 @@ import threading
 import queue
 
 app = Flask(__name__)
-
 FILESTORE = "store/"
+jobQueue = queue.Queue()
+jobRegistry = {}
 
-#create route and pass in url
-@app.route("/")
-def index():
-    return render_template("index.html")
 
+# save file and return file name, extension and as the path it is stored at
+def save_file(file):
+    _, file_extension = os.path.splitext(file.filename)
+
+    if fileEndings.has_value(file_extension.lower()):
+        file_name = str(uuid.uuid4())
+        path = os.path.join(FILESTORE, file_name)
+        file.save(path)
+        return file_name, path, file_extension
+    else:
+        return None, None, None
+
+
+# returns jobid if known to registry, otherwise returns None
+def get_job_by_id(id_):
+    if id_ in jobRegistry:
+        return jobRegistry[id]
+    else:
+        return None
+
+
+# Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
+# upon sucess
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if request.method == 'POST':
+        file = request.files['file']
+        file_name, path, file_extension = save_file(file)
 
-        f = request.files['file']
-
-        _, file_extension = os.path.splitext(f.filename)
-
-        if(fileEndings.has_value(file_extension.lower())):
-
-            file_name = str(uuid.uuid4())
-            path = os.path.join(FILESTORE, file_name)
-            f.save(path)
-
+        if file_name:
             job = jobObject(path, file_name)
-
             jobRegistry[job.id] = job
-
             jobQueue.put(job)
 
-            response_object = jsonify({"jobid" : job.id})
-
             status_code = 200
-
+            response_object = jsonify({"jobid": job.id})
         else:
             status_code = 422
-
-            response_object = jsonify({"Error" : "Unsupported file ending: " + file_extension})
-
-        return response_object,status_code
-
-@app.route("/get_file", methods=["GET"])
-def get_wiggle_by_id():
-    if request.method == 'GET':
-        id = request.args.get('jobid', type = str)
-
-        if(id in jobRegistry.keys()):
-            job = jobRegistry[id]
-
-            return send_from_directory(FILESTORE, job.name)
-        else:
-            status_code = 404
-
-            response_object = jsonify({"Error": "No file found with id: " + id})
-
-            return response_object, status_code
-
-@app.route("/get_state", methods=["GET"])
-def get_job_state_by_id():
-    if request.method == 'GET':
-        id = request.args.get('jobid', type = str)
-
-        if(id in jobRegistry.keys()):
-            job = jobRegistry[id]
-
-            status = job.status.value
-
-            status_code = 200
-
-            response_object = jsonify({"Job status": status})
-
-        else:
-            status_code = 404
-
-            response_object = jsonify({"Error": "No file found with id: " + id})
+            response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
 
         return response_object, status_code
 
 
+# get file by id endpoint. Returns the wiggle file if a job with given id exists
+@app.route("/get_file", methods=["GET"])
+def get_wiggle_by_id():
+    if request.method == 'GET':
+        id = request.args.get('jobid', type=str)
+        job = get_job_by_id(id)
+
+        if job:
+            return send_from_directory(FILESTORE, job.name)
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+            return response_object, status_code
+
+
+# gets job state by id. Returns job state ("Not started", "Running", "Finished", "Failed") if job exists
+@app.route("/get_state", methods=["GET"])
+def get_job_state_by_id():
+    if request.method == 'GET':
+        id = request.args.get('jobid', type=str)
+        job = get_job_by_id(id)
+        if job:
+            status = job.status.value
+            status_code = 200
+            response_object = jsonify({"Job status": status})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
+
+# gets tss prediction by id. Fails if Job state is not finished.
 @app.route("/get_tss", methods=["GET"])
 def get_tss_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
-
-        if (id in jobRegistry.keys()):
-            job = jobRegistry[id]
-
+        job = get_job_by_id(id)
+        if job:
             try:
-                returnObject = job.getReturnObject()
+                return_object = job.getReturnObject()
                 status_code = 200
-                response_object = jsonify(returnObject)
+                response_object = jsonify(return_object)
             except NotReadyException as e:
                 status_code = 400
                 response_object = jsonify({"Error": e.message})
-
-
-
-
         else:
             status_code = 404
-
             response_object = jsonify({"Error": "No file found with id: " + id})
-
         return response_object, status_code
 
-if(__name__ == "__main__"):
 
-    jobQueue = queue.Queue()
-
-    jobThread = threading.Thread(target=jobProcessor, args= (jobQueue,))
-
+if __name__ == "__main__":
+    jobThread = threading.Thread(target=jobProcessor, args=(jobQueue,))
     jobThread.daemon = True
-
     jobThread.start()
-
-    jobRegistry = {}
-
     app.run(debug=True)
