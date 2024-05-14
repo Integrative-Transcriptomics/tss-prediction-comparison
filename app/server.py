@@ -1,10 +1,10 @@
 import os
 import uuid
 from flask import Flask, request, jsonify, send_from_directory
-from api.allowedFileTypes import FileEndings
-from job.jobProcessor import job_processor
-from job.JobObject import JobObject
-from job.NotReadyException import NotReadyException
+from app.api.allowedFileTypes import FileEndings
+from app.job.jobProcessor import job_processor
+from app.job.JobObject import JobObject
+from app.job.NotReadyException import NotReadyException
 import threading
 import queue
 
@@ -63,7 +63,6 @@ def get_wiggle_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
         job = get_job_by_id(id)
-
         if job:
             return send_from_directory(FILESTORE, job.name)
         else:

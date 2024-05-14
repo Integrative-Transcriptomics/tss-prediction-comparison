@@ -1,9 +1,7 @@
 import uuid
-import sys
-sys.path.append("..")
-from .JobStatus import JobStatus
-from .NotReadyException import NotReadyException
-from prediction.tssPredictor import tss_predictor
+from app.job.JobStatus import JobStatus
+from app.job.NotReadyException import NotReadyException
+from app.prediction.tssPredictor import tss_predictor
 
 
 class JobObject:
