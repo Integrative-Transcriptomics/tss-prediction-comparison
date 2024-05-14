@@ -7,3 +7,5 @@
 .idea
 venv
 app/store
+app/__pycache__
+tests/__pycache__

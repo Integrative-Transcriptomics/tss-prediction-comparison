@@ -9,10 +9,14 @@ import threading
 import queue
 
 app = Flask(__name__)
-FILESTORE = "store/"
+dirname = os.path.dirname(__file__)
+FILESTORE = os.path.join(dirname, "store/")
 jobQueue = queue.Queue()
 jobRegistry = {}
 
+jobThread = threading.Thread(target=job_processor, args=(jobQueue,))
+jobThread.daemon = True
+jobThread.start()
 
 # save file and return file name, extension and as the path it is stored at
 def save_file(file):
@@ -108,7 +112,4 @@ def get_tss_by_id():
 
 
 if __name__ == "__main__":
-    jobThread = threading.Thread(target=job_processor, args=(jobQueue,))
-    jobThread.daemon = True
-    jobThread.start()
     app.run(debug=True)
