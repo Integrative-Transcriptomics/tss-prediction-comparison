@@ -9,7 +9,9 @@ importlib_metadata==7.1.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
+numpy==1.26.4
 SQLAlchemy==2.0.30
 typing_extensions==4.11.0
 Werkzeug==3.0.3
+wiggelen==0.4.1
 zipp==3.18.1
