@@ -9,7 +9,7 @@ import operator
 
 # parsing wiggle file to pandas DataFrame for further processing:
 
-wiggle = os.path.relpath('..\\..\\tests\\test_files\\test.wig')
+
 def parse_wiggle_to_DataFrame(wiggle):
     """
     parses a wiggle file to a pandas DataFrame
@@ -20,10 +20,9 @@ def parse_wiggle_to_DataFrame(wiggle):
 
     for region, position, value in wig.fill(wig.walk(open(wiggle))):
         lst_of_triple.append((region, position, value))
-    return pd.DataFrame(lst_of_triple)
+    return pd.DataFrame(lst_of_triple, columns=["region", "position", "value"])
 
 
-# Aron
 def __apply_operation(operation, data_frame, x, start, stop):
     """
     applys a given value x with a given arithmetic operation to interval of values of given wiggle
@@ -38,7 +37,7 @@ def __apply_operation(operation, data_frame, x, start, stop):
         data_frame.at[i, 'value'] = operation(data_frame.at[i, 'value'], x)
     return data_frame
 
-# Addition
+
 def add_x(data_frame, x, start, stop):
     """
     adds x to each value of given interval in 'value column' of data_frame
@@ -51,7 +50,6 @@ def add_x(data_frame, x, start, stop):
     return __apply_operation(operator.add, data_frame, x, start, stop)
 
 
-# Subtraktion
 def sub_x(data_frame, x, start, stop):
     """
     subtracts x from each value of given interval in 'value column' of data_frame
@@ -64,7 +62,6 @@ def sub_x(data_frame, x, start, stop):
     return __apply_operation(operator.sub, data_frame, x, start, stop)
 
 
-# Multiplikation
 def mult_x(data_frame, x, start, stop):
     """
     multiplies each value of given interval in 'value column' of data_frame with x
@@ -77,7 +74,6 @@ def mult_x(data_frame, x, start, stop):
     return __apply_operation(operator.mul(), data_frame, x, start, stop)
 
 
-# Division
 def div_x(data_frame, x, start, stop):
     """
     divides each value of given interval in 'value column' of data_frame with x
@@ -88,6 +84,14 @@ def div_x(data_frame, x, start, stop):
     :return: data_frame
     """
     return __apply_operation(operator.truediv(), data_frame, x, start, stop)
+
+
+# tests
+wiggle = os.path.relpath('..\\..\\tests\\test_files\\test.wig')
+df = parse_wiggle_to_DataFrame(wiggle)
+print(df)
+df1 = add_x(df, 1, 0, len(df['value']))
+print(df1)
 
 
 # Amelie
