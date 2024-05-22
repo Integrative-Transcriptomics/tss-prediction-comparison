@@ -4,10 +4,8 @@ import os
 import operator
 
 
-# this file contains useful mathematical methods for the work with wiggle files
-
-
-# parsing wiggle file to pandas DataFrame for further processing:
+# this file contains a wiggle parser and useful mathematical methods for the work with wiggle files
+# we will parse the wiggle files to pandas DataFrames since working with these is a lot easier
 
 
 def parse_wiggle_to_DataFrame(wiggle):
