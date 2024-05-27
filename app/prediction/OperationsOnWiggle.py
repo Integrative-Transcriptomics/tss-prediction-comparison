@@ -84,6 +84,79 @@ def div_x(data_frame, x, start, stop):
     return __apply_operation(operator.truediv(), data_frame, x, start, stop)
 
 
+def filter_df(data_frame, start, stop):
+    """
+    extracts the interval between the given positions from a data frame as a new data frame
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :param start: start of interval
+    :param stop: end of interval
+    :return: data frame
+    """
+    if stop is None:
+        stop = data_frame.iloc[-1]["position"]
+
+    if start != 0:
+        start -= 1
+
+    data_frame = data_frame[start:stop]
+
+    return data_frame
+
+
+def median(data_frame, start=0, stop=None):
+    """
+    calculates the median of the values of the given interval, None values are ignored
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :param start: start of interval
+    :param stop: end of interval(included)
+    :return: median
+    """
+    data_frame = filter_df(data_frame, start, stop)
+
+    return data_frame["value"].median()
+
+
+def quantil(data_frame, q, start=0, stop=None):
+    """
+    returns the value at the given quantile (limited to the specified interval)
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :param q: quantile
+    :param start: start of interval
+    :param stop: end of interval(included)
+    :return: quantile
+    """
+    data_frame = filter_df(data_frame, start, stop)
+
+    return data_frame["value"].quantile(q)
+
+
+def mean(data_frame, start=0, stop=None):
+    """
+    calculates mean of the values of the given interval, None values are ignored
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :param start: start of interval
+    :param stop: end of interval(included)
+    :return: mean
+    """
+
+    data_frame = filter_df(data_frame, start, stop)
+
+    return data_frame["value"].mean()
+
+
+def std(data_frame, start=0, stop=None):
+    """
+    calculates the standard deviation of the values of the given interval, None values are ignored
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :param start: start of interval
+    :param stop: end of interval(included)
+    :return: std
+    """
+    data_frame = filter_df(data_frame, start, stop)
+    return data_frame["value"].std()
+
+
+
 # tests
 wiggle = os.path.relpath('..\\..\\tests\\test_files\\test.wig')
 df = parse_wiggle_to_DataFrame(wiggle)
@@ -91,11 +164,7 @@ print(df)
 df1 = add_x(df, 1, 0, len(df['value']))
 print(df1)
 
-
-# Amelie
-# Median
-# Quantil
-# Mean
-# Standartabweichung
-
-
+print(mean(df))
+print(median(df))
+print(quantil(df, 0.5))
+print(std(df))
