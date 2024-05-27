@@ -154,17 +154,3 @@ def std(data_frame, start=0, stop=None):
     """
     data_frame = filter_df(data_frame, start, stop)
     return data_frame["value"].std()
-
-
-
-# tests
-wiggle = os.path.relpath('..\\..\\tests\\test_files\\test.wig')
-df = parse_wiggle_to_DataFrame(wiggle)
-print(df)
-df1 = add_x(df, 1, 0, len(df['value']))
-print(df1)
-
-print(mean(df))
-print(median(df))
-print(quantil(df, 0.5))
-print(std(df))
