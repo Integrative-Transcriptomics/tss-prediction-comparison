@@ -21,7 +21,8 @@ def parse_wiggle_to_DataFrame(wiggle):
     return pd.DataFrame(lst_of_triple, columns=["region", "position", "value"])
 
 
-# the following methods expect the input DataFrame to be of form: col1 -> region, col2 -> position, col3 -> value;
+# the following methods expect the input DataFrame to be of form: col1 -> region, col2 -> position, col3 -> value
+# methods for operations on single DataFrames:
 
 def __apply_operation(operation, data_frame, x, start, stop):
     """
@@ -158,6 +159,8 @@ def std_of_values(data_frame, start=0, stop=None):
     return data_frame["value"].std()
 
 
+# methods for operations on multiple DataFrames:
+
 def __apply_operation_to_multiple_df(lst_of_df, operation):
     """
     Computes DataFrame which holds a value x at position i in column "value".
@@ -218,3 +221,6 @@ def get_min_values_of_multiple_df(lst_of_df):
     :return: new_df with min as values
     """
     return __apply_operation_to_multiple_df(lst_of_df, min)
+
+
+#TODO: Implement a function that provides the input for the prediction of TSSs and accounts for possible multiple conditions.
