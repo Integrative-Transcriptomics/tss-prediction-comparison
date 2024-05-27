@@ -15,4 +15,4 @@ typing_extensions==4.11.0
 Werkzeug==3.0.3
 wiggelen==0.4.1
 zipp==3.18.1
-pandas~=2.2.2
+pandas==2.2.2
