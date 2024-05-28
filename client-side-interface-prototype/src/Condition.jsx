@@ -4,6 +4,7 @@ function Condition({ id }) {
   const [replicates, setReplicates] = useState('');
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
+  
 
   const handleReplicatesChange = (e) => {
     setReplicates(e.target.value);
@@ -11,6 +12,7 @@ function Condition({ id }) {
   };
 
   const handleFileUpload = (e) => {
+    //
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length > replicates) {
       setError(`You can only upload ${replicates} files.`);
@@ -24,7 +26,14 @@ function Condition({ id }) {
     }
 
     setError('');
-    setFiles(selectedFiles);
+    /*whenever more than 1 file is uploaded we overwrote the current state. With this line instead of 
+      overwriting the state we append the newly selected file to the previously selected files. 
+      Syntax:
+      prevFiles is a parameter fo the arrow function. Its the previous state and inside the square brackets 
+      is the new state. The dots are the spread operator, put them in front of an array and you get all elements of 
+      the array. 
+    */
+    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
   };
 
   return (
@@ -48,6 +57,11 @@ function Condition({ id }) {
           accept=".wig"
           disabled={!replicates}
         />
+        {files.map((file, index) => (
+          <p key={index}>
+            {file.name}
+          </p>
+        ))}
       </div>
       {error && <p className="error">{error}</p>}
     </div>
