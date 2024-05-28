@@ -44,13 +44,28 @@ button {
 }
 
 .remove-button {
-  padding: 10px 20px;
+  padding: 5px 20px;
   background-color: darkred;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  /*aligns the remove button to the right side of the box*/
+  
 }
+
+/*to put the remove button next to the corresponding paragraph (the line of the file thats being removed)
+  we have to put them in a div together and then align the items of the div.  
+  display: flex puts the items of the div in one row
+  justify-content: space-between pushes the items on the right side (remove buttons) to the right of the 
+  flex container (overviewOfFiles)
+*/
+.overviewOfFiles {
+  display: flex;
+  align-items: center;  
+  justify-content: space-between;
+}
+
 
 .remove-button:hover {
   background-color: #7A0000;

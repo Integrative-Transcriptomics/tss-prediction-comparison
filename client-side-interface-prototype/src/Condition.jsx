@@ -70,7 +70,7 @@ function Condition({ id }) {
         />
 
         {files.map((file, index) => (
-          <div key={index}>
+          <div className="overviewOfFiles" key={index}>
             <p>
               {file.name}
             </p>
