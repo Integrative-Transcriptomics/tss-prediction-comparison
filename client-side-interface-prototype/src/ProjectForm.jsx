@@ -9,6 +9,14 @@ function ProjectForm() {
     setConditions([...conditions, { id: conditions.length + 1 }]);
   };
 
+  const deleteCondition = () => {
+    if (conditions.length > 1) {
+      const newConditions = [...conditions];
+      newConditions.pop();
+      setConditions(newConditions);
+    }
+  };
+
   const handleProjectNameChange = (e) => {
     setProjectName(e.target.value);
   };
@@ -40,6 +48,7 @@ function ProjectForm() {
           <Condition key={condition.id} id={condition.id} />
         ))}
         <button type="button" onClick={addCondition}>+</button>
+        <button type="button" onClick={deleteCondition}>-</button>
       </div>
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
     </div>
