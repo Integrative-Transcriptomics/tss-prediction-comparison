@@ -11,8 +11,16 @@ function Condition({ id }) {
     setFiles([]); // Reset the files when the number of replicates changes
   };
 
+  // to remove the file at the given index from the array without directly changing the current state
+  // we remove the file from a copy of files of the current state and return the updated copy
+  // splice(index, 1) removes 1 element at the index index
+  const handleRemoveFile = (index) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1); 
+    setFiles(newFiles);
+  }
   const handleFileUpload = (e) => {
-    //
+    // if the user double-clicks a file in his explorer selectedFiles only contains that file
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length > replicates) {
       setError(`You can only upload ${replicates} files.`);
@@ -37,6 +45,9 @@ function Condition({ id }) {
   };
 
   return (
+    // the files.map creates a paragraph for each file with the specific index
+    // inside the .map we can also add a button so that one button for each file is created, this
+    // button needs to call the file-remove-handler 
     <div className="condition">
       <h3>Condition {id}</h3>
       <div className="form-group">
@@ -57,11 +68,18 @@ function Condition({ id }) {
           accept=".wig"
           disabled={!replicates}
         />
+
         {files.map((file, index) => (
-          <p key={index}>
-            {file.name}
-          </p>
+          <div key={index}>
+            <p>
+              {file.name}
+            </p>
+            <button className='remove-button' onClick={() => handleRemoveFile(index)}>
+              Remove  
+            </button>
+          </div>
         ))}
+
       </div>
       {error && <p className="error">{error}</p>}
     </div>
