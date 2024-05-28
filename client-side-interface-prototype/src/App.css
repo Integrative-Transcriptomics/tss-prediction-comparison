@@ -8,6 +8,12 @@
   border: 1px solid #ccc;
   padding: 20px;
   border-radius: 5px;
+  /*adjust the following parameters to make the window fill out more of the screen
+    width generally makes everthing bigger, margin makes the spaces between elements bigger, 
+    auto centers it vertically (first argument of margin) or horizontally (second argument of margin) 
+  */
+  width: 80%;
+  margin: 0 auto;
 }
 
 .form-group {
