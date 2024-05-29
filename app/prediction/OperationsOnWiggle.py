@@ -31,7 +31,7 @@ def __apply_operation(operation, data_frame, x, start, stop):
     :param stop: last value of data_frame which operation will be applied on
     :return data_frame
     """
-    for i in range(start, stop):
+    for i in range(start-1, stop):
         data_frame.at[i, 'value'] = operation(data_frame.at[i, 'value'], x)
     return data_frame
 
@@ -69,7 +69,7 @@ def mult_x(data_frame, x, start, stop):
     :param stop: last value of data_frame which x will be multiplied with x
     :return: data_frame
     """
-    return __apply_operation(operator.mul(), data_frame, x, start, stop)
+    return __apply_operation(operator.mul, data_frame, x, start, stop)
 
 
 def div_x(data_frame, x, start, stop):
@@ -81,7 +81,7 @@ def div_x(data_frame, x, start, stop):
     :param stop: last value of data_frame which x will be divided by x
     :return: data_frame
     """
-    return __apply_operation(operator.truediv(), data_frame, x, start, stop)
+    return __apply_operation(operator.truediv, data_frame, x, start, stop)
 
 
 def filter_df(data_frame, start, stop):
@@ -118,7 +118,7 @@ def median(data_frame, start=0, stop=None):
 
 def quantil(data_frame, q, start=0, stop=None):
     """
-    returns the value at the given quantile (limited to the specified interval)
+    calculates the q-quantile of the values in the specified interval
     :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
     :param q: quantile
     :param start: start of interval
@@ -153,18 +153,4 @@ def std(data_frame, start=0, stop=None):
     :return: std
     """
     data_frame = filter_df(data_frame, start, stop)
-    return data_frame["value"].std()
-
-
-
-# tests
-wiggle = os.path.relpath('..\\..\\tests\\test_files\\test.wig')
-df = parse_wiggle_to_DataFrame(wiggle)
-print(df)
-df1 = add_x(df, 1, 0, len(df['value']))
-print(df1)
-
-print(mean(df))
-print(median(df))
-print(quantil(df, 0.5))
-print(std(df))
+    return data_frame["value"].std(ddof=0)
