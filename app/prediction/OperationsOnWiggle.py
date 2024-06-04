@@ -35,7 +35,7 @@ def __apply_operation(operation, data_frame, x, start, stop):
     :return data_frame
     """
 
-    for i in range(start-1, stop):
+    for i in range(start - 1, stop):
         data_frame.at[i, 'value'] = operation(data_frame.at[i, 'value'], x)
     return data_frame
 
@@ -162,15 +162,37 @@ def std_of_values(data_frame, start=0, stop=None):
 
 # methods for operations on multiple DataFrames:
 
+
+def fill_dataframe(df, full_positions):
+    """
+    fills up all the positions of the df that are included in full_positions and dont already hold a value
+    with 0
+    :param df: DataFrames
+    :param full_positions: range object that contains all the positions for which the df should have values
+    :return: df_full
+    """
+    region = df['region'].iloc[0]
+    df_full = pd.DataFrame({'position': full_positions})
+    df_full = df_full.merge(df, on='position', how='left').fillna(0)
+    df_full['region'] = region
+    df_full = df_full[['region', 'position', 'value']]
+    return df_full
+
+
 def __apply_operation_to_multiple_df(lst_of_df, operation):
     """
     Computes DataFrame which holds a value x at position i in column "value".
     x is calculated with 'operation' and the values at position i of column "value" of all DataFrames in lst_of_df
-    The "value" columns of the DataFrames in lst_of_df are expected to be of same length.
     :param lst_of_df: holds DataFrames
     :param operation: operation which will be applied
     :return: new_df
     """
+    max_length = max(len(df) for df in lst_of_df)
+    full_positions = range(1, max_length + 1)
+
+    for i in range(len(lst_of_df)):
+        lst_of_df[i] = fill_dataframe(lst_of_df[i], full_positions)
+
     new_df = lst_of_df[0]
     for row in range(len(new_df["value"])):
         values_of_dfs = []
@@ -184,7 +206,6 @@ def median_of_multiple_df(lst_of_df):
     """
     Computes DataFrame which holds a median at position x.
     The median is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
-    The "value" columns of the DataFrames in lst_of_df are expected to be of same length.
     :param lst_of_df: holds DataFrames
     :return: new_df with median as values
     """
@@ -195,7 +216,6 @@ def add_values_of_multiple_df(lst_of_df):
     """
     Computes DataFrame which holds a sum at position x.
     The sum is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
-    The "value" columns of the DataFrames in lst_of_df are expected to be of same length.
     :param lst_of_df: holds DataFrames
     :return: new_df with sum as values
     """
@@ -206,7 +226,6 @@ def get_max_values_of_multiple_df(lst_of_df):
     """
     Computes DataFrame which holds a max at position x.
     The max is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
-    The "value" columns of the DataFrames in lst_of_df are expected to be of same length.
     :param lst_of_df: holds DataFrames
     :return: new_df with max as values
     """
@@ -217,7 +236,6 @@ def get_min_values_of_multiple_df(lst_of_df):
     """
     Computes DataFrame which holds a min at position x.
     The sum is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
-    The "value" columns of the DataFrames in lst_of_df are expected to be of same length.
     :param lst_of_df: holds DataFrames
     :return: new_df with min as values
     """

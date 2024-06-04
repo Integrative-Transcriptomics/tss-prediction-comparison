@@ -15,6 +15,18 @@ class MyTestCase(unittest.TestCase):
             "value": [520.0, 536.0, 553.0, None, 568.0]
         })
 
+        self.df2 = pd.DataFrame({
+            "region": ["MT"] * 6,
+            "position": [1, 2, 3, 4, 5, 6],
+            "value": [521.0, 550.0, 553.0, 557.0, 563.0, 600]
+        })
+
+        self.df3 = pd.DataFrame({
+            "region": ["MT"] * 6,
+            "position": [1, 2, 3, 4, 5, 6],
+            "value": [20.0, 500.0, 1553.0, 1557.0, 1563.0, 1600]
+        })
+
     def test_parse_wiggle_to_DataFrame(self):
         df = ops.parse_wiggle_to_DataFrame(file_path)
         pd.testing.assert_frame_equal(df, self.df)
@@ -71,21 +83,33 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(ops.std_of_values(self.df), 18.00520758)
 
     def test_add_values_of_multiple_df(self):
-
-        self.df.at[3, 'value'] = 7.0
-
-        df2 = pd.DataFrame({
-            "region": ["MT"] * 5,
-            "position": [1, 2, 3, 4, 5],
-            "value": [520.0, 536.0, 553.0, 557.0, 563.0]
-        })
         expected_result = pd.DataFrame({
-            "region": ["MT"] * 5,
-            "position": [1, 2, 3, 4, 5],
-            "value": [1040.0, 1072.0, 1106.0, 564.0, 1131.0]
+            "region": ["MT"] * 6,
+            "position": [1, 2, 3, 4, 5, 6],
+            "value": [1041.0, 1086.0, 1106.0, 557.0, 1131.0, 600]
         })
 
-        result = ops.add_values_of_multiple_df([self.df, df2])
+        result = ops.add_values_of_multiple_df([self.df, self.df2])
+        pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_median_of_multiple_df(self):
+        expected_result = pd.DataFrame({
+            "region": ["MT"] * 6,
+            "position": [1, 2, 3, 4, 5, 6],
+            "value": [520.0, 536.0, 553.0, 557.0, 568.0, 600]
+        })
+
+        result = ops.median_of_multiple_df([self.df, self.df2, self.df3])
+        pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_get_max_values_of_multiple_df(self):
+        expected_result = pd.DataFrame({
+            "region": ["MT"] * 6,
+            "position": [1, 2, 3, 4, 5, 6],
+            "value": [521.0, 550.0, 1553.0, 1557.0, 1563.0, 1600]
+        })
+
+        result = ops.get_max_values_of_multiple_df([self.df, self.df2, self.df3])
         pd.testing.assert_frame_equal(result, expected_result)
 
 
