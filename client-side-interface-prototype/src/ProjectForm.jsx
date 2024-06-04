@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Condition from './Condition';
+import TssMasterTable from './TssMasterTable';
 
 function ProjectForm() {
   const [projectName, setProjectName] = useState('');
@@ -47,8 +48,12 @@ function ProjectForm() {
         {conditions.map((condition) => (
           <Condition key={condition.id} id={condition.id} />
         ))}
-        <button type="button" onClick={addCondition}>+</button>
-        <button type="button" onClick={deleteCondition}>-</button>
+        <button className="button" onClick={addCondition}>+</button>
+        <button className="remove-button" onClick={deleteCondition}>-</button>
+      </div>
+      <div className = "tss-master-table">
+        <label>Master table from TSS predator</label>
+        <TssMasterTable />
       </div>
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
     </div>
