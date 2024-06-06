@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function TssMasterTable() {
+function GFF() {
   const [file, setFile] = useState(null);
 
   const handleFileUpload = (e) => {
@@ -14,11 +14,11 @@ function TssMasterTable() {
 
   return (
     <div className="form-group">
-      <label><b>Upload master table from TSS predator (optional):</b></label>
+      <label><b>Upload GFF-file (optional):</b></label>
       <input
         type="file"
         onChange={handleFileUpload}
-        accept=".tsv"
+        accept=".gff"
         style={{ display: file ? 'none' : 'block' }}
       />
       {file && (
@@ -31,4 +31,4 @@ function TssMasterTable() {
   );
 }
 
-export default TssMasterTable;
+export default GFF;

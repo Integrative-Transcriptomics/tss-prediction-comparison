@@ -35,7 +35,6 @@ input[type="file"] {
   box-sizing: border-box;
 }
 
-/* In this button class one can change the font color of the +, -, and the "Start TSS Prediction" button*/
 button {
   padding: 10px 20px;
   background-color: #14aa00;
@@ -45,32 +44,10 @@ button {
   cursor: pointer;
 }
 
-.remove-button {
-  padding: 10px 20px;
-  background-color: rgb(247, 247, 247);
-  color: rgb(255, 0, 0);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  /*aligns the remove button to the right side of the box*/
-  
-}
-
-/*to put the remove button next to the corresponding paragraph (the line of the file thats being removed)
-  we have to put them in a div together and then align the items of the div.  
-  display: flex puts the items of the div in one row
-  justify-content: space-between pushes the items on the right side (remove buttons) to the right of the 
-  flex container (overviewOfFiles)
-*/
 .overviewOfFiles {
   display: flex;
   align-items: center;  
   justify-content: space-between;
-}
-
-
-.remove-button:hover {
-  background-color: #888888;
 }
 
 button:hover {
@@ -79,10 +56,11 @@ button:hover {
 
 .start-button {
   background-color: #28a745;
+  color: white;
 }
 
 .start-button:hover {
-  background-color: #1f7a33;
+  background-color: #29ca4c;
 }
 
 .condition {
@@ -90,6 +68,48 @@ button:hover {
   padding: 15px;
   border-radius: 5px;
   margin-bottom: 20px;
+}
+
+.custom-file-upload {
+  background-color: #5b84a5;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.custom-file-upload:hover {
+  background-color: #1e99be
+}
+
+.remove-button {
+  background-color: #f44336;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.remove-button:hover {
+  background-color: #888888;
+}
+
+.file-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .error {
