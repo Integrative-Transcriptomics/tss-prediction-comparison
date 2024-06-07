@@ -11,6 +11,10 @@ import queue
 app = Flask(__name__)
 dirname = os.path.dirname(__file__)
 FILESTORE = os.path.join(dirname, "store/")
+
+if not os.path.exists(FILESTORE):
+    os.makedirs(FILESTORE)
+
 jobQueue = queue.Queue()
 jobRegistry = {}
 

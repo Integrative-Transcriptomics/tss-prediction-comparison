@@ -67,3 +67,6 @@ class TestApp(TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    # cleanup any generated files
+    for file in server.FILESTORE:
+        os.remove(file)
