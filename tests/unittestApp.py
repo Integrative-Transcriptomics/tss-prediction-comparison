@@ -3,6 +3,7 @@ import os
 import time
 from unittest import TestCase
 from app import server
+import ast
 
 dirname = os.path.dirname(__file__)
 correct_file = os.path.join(dirname,'test_files/test.wig')
@@ -26,6 +27,10 @@ class TestApp(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('jobid', data)
 
+        response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
+        while "Error" in response.get_json().keys():
+            response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
+
         # Test unsupported file format
         response, data = self.upload_file(wrong_file)
         self.assertEqual(response.status_code, 422)
@@ -37,6 +42,10 @@ class TestApp(TestCase):
         response = self.testing_client.get('/get_file?jobid='+data["jobid"])
         self.assertEqual(response.status_code, 200)
 
+        response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
+        while "Error" in response.get_json().keys():
+            response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
+
         # Test getting file by invalid id
         response = self.testing_client.get('/get_file?jobid=invalid_id')
         self.assertEqual(response.status_code, 404)
@@ -46,6 +55,10 @@ class TestApp(TestCase):
         _, data = self.upload_file(correct_file)
         response = self.testing_client.get('/get_state?jobid='+data["jobid"])
         self.assertEqual(response.status_code, 200)
+
+        response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
+        while "Error" in response.get_json().keys():
+            response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
 
         # Test getting job state by invalid id
         response = self.testing_client.get('/get_state?jobid=invalid_id')
@@ -59,6 +72,7 @@ class TestApp(TestCase):
         while "Error" in response.get_json().keys():
             response = self.testing_client.get('/get_tss?jobid=' + data["jobid"])
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(ast.literal_eval(response.data.decode('utf-8')), {"TSS Sites": []})
 
         # Test getting TSS prediction by invalid id
         response = self.testing_client.get('/get_tss?jobid=invalid_id')

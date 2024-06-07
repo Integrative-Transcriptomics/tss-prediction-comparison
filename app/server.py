@@ -52,7 +52,7 @@ def upload_file():
         file_name, path, file_extension = save_file(file)
 
         if file_name:
-            job = JobObject(path, file_name)
+            job = JobObject([path], file_name)
             jobRegistry[job.id] = job
             jobQueue.put(job)
 

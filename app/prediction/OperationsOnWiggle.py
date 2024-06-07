@@ -16,7 +16,7 @@ def parse_wiggle_to_DataFrame(wiggle):
     """
     lst_of_triple = []
 
-    for region, position, value in wig.fill(wig.walk(open(wiggle))):
+    for region, position, value in wig.fill(wig.walk(open(wiggle, "r"))):
         lst_of_triple.append((region, position, value))
     return pd.DataFrame(lst_of_triple, columns=["region", "position", "value"])
 
@@ -323,5 +323,9 @@ def parse_for_prediction(wiggle_files):
 
     prediction_df = pd.concat([median_df["value"], zscore, gradient_df["first gradient"],
                                gradient_df["second gradient"], previous_df], axis=1)
+
+    #filtering
+    prediction_df = prediction_df[prediction_df["first gradient"] > 0]
+    prediction_df = prediction_df[prediction_df["zscore"] > 0]
 
     return prediction_df

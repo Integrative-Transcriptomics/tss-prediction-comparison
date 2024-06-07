@@ -16,3 +16,4 @@ Werkzeug==3.0.3
 wiggelen==0.4.1
 zipp==3.18.1
 pandas==2.2.2
+scikit-learn==1.4.2
