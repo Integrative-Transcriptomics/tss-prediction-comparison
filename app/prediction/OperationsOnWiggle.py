@@ -263,7 +263,7 @@ def z_score(data_frame):
        """
 
     median = median_of_values(data_frame)
-    mad = mean_absolute_deviation(data_frame)
+    mad = mean_absolute_deviation(data_frame) +0.01
     modified_z_scores = 0.6745 * (data_frame["value"] - median) / mad
     modified_z_scores.name = "zscore"
     return modified_z_scores

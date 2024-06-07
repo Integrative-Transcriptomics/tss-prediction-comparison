@@ -22,6 +22,6 @@ def tss_predictor_sklearn(data_frame):
     tss_list = []
 
     for index, site in enumerate(tss):
-        tss_list.append({"start": site, "end": site, "confidence": probabilities[index]})
+        tss_list.append({"start": int(site), "end": int(site), "confidence": float(probabilities[index])})
 
     return {"TSS Sites": tss_list}
