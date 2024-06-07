@@ -298,7 +298,7 @@ def previous(data_frame):
         previous_values += [previous]
         previous = value
 
-    return pd.Series(previous_values, name="previous")
+    return pd.Series(previous_values, name="previous", index=data_frame.index.values)
 
 
 def parse_for_prediction(wiggle_files):
@@ -313,6 +313,15 @@ def parse_for_prediction(wiggle_files):
 
     median_df = median_of_multiple_df(parsed_dfs)
 
+    median_df = median_df.dropna()
+
     zscore = z_score(median_df)
 
     gradient_df = gradients(median_df)
+
+    previous_df = previous(median_df)
+
+    prediction_df = pd.concat([median_df["value"], zscore, gradient_df["first gradient"],
+                               gradient_df["second gradient"], previous_df], axis=1)
+
+    return prediction_df

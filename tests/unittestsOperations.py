@@ -131,5 +131,19 @@ class MyTestCase(unittest.TestCase):
         result = ops.previous(self.df2)
         pd.testing.assert_series_equal(result, expected_result)
 
+    def test_parse_for_prediction(self):
+        expected_result = pd.DataFrame({'value': {0: 520.0, 1: 536.0, 2: 553.0, 3: 0.0, 4: 568.0},
+         'zscore': {0: -0.6348235294117647,
+                    1: 0.0,
+                    2: 0.6745,
+                    3: -21.266588235294115,
+                    4: 1.2696470588235294},
+         'first gradient': {0: 16.0, 1: 16.5, 2: -268.0, 3: 7.5, 4: 568.0},
+         'second gradient': {0: 0.5, 1: -142.0, 2: -4.5, 3: 418.0, 4: 560.5},
+         'previous': {0: 0.0, 1: 520.0, 2: 536.0, 3: 553.0, 4: 0.0}})
+
+        result = ops.parse_for_prediction([file_path])
+        pd.testing.assert_frame_equal(result, expected_result)
+
 if __name__ == '__main__':
     unittest.main()
