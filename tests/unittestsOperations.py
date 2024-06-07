@@ -112,6 +112,18 @@ class MyTestCase(unittest.TestCase):
         result = ops.get_max_values_of_multiple_df([self.df, self.df2, self.df3])
         pd.testing.assert_frame_equal(result, expected_result)
 
+    def test_mean_absolute_deviation(self):
+        expected_result = 6.5
+
+        result = ops.mean_absolute_deviation(self.df2)
+        self.assertEqual(expected_result, result)
+
+    def test_zscore(self):
+        expected_result = pd.DataFrame({'first gradient': {0: 29.0, 1: 16.0, 2: 3.5, 3: 5.0, 4: 21.5, 5: 37.0},
+                            'second gradient': {0: -13.0, 1: -12.75, 2: -5.5, 3: 9.0, 4: 16.0, 5: 15.5}})
+
+        result = ops.gradients(self.df2)
+        pd.testing.assert_frame_equal(result, expected_result)
 
 if __name__ == '__main__':
     unittest.main()

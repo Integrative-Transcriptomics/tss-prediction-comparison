@@ -241,6 +241,59 @@ def get_min_values_of_multiple_df(lst_of_df):
     """
     return __apply_operation_to_multiple_df(lst_of_df, min)
 
+def mean_absolute_deviation(data_frame):
+    """
+    calculates the mean absolute deviation of the values, None values are ignored
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :return: MAD
+    """
+
+    median = median_of_values(data_frame)
+
+    return np.median(np.abs(data_frame["value"] - median))
+
 
 #TODO: Implement a function that provides the input for the prediction of TSSs and accounts for possible multiple conditions.
+
+def z_score(data_frame):
+    """
+       Computes a modified z score using the median and MAD.
+       :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+       :return: pandas DataFrame
+       """
+
+    median = median_of_values(data_frame)
+    mad = mean_absolute_deviation(data_frame)
+    modified_z_scores = 0.6745 * (data_frame["value"] - median) / mad
+    modified_z_scores.name = "zscore"
+    return modified_z_scores
+
+def gradients(data_frame):
+    """
+           Computes the first and second gradient (approximation of derivative) for a given DataFrame.
+           :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+           :return: pandas DataFrame 1st, 2nd gradient
+    """
+
+    first_gradient = np.gradient(data_frame["value"])
+
+    second_gradient = np.gradient(first_gradient)
+
+    gradient_data_frame = pd.DataFrame({"first gradient": first_gradient, "second gradient": second_gradient})
+
+    gradient_data_frame.index = data_frame.index.values
+
+    return gradient_data_frame
+
+def parse_for_prediction(wiggle_files):
+    """
+    Computes final pre prepared DataFrame for prediction.
+    The sum is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
+    :param wiggle_files: list of paths to wiggle files
+    :return: pandas DataFrame
+    """
+
+    parsed_dfs = [parse_wiggle_to_DataFrame(wiggle) for wiggle in wiggle_files]
+
+    median_df = median_of_multiple_df(parsed_dfs)
 
