@@ -64,9 +64,11 @@ class TestApp(TestCase):
         response = self.testing_client.get('/get_tss?jobid=invalid_id')
         self.assertEqual(response.status_code, 404)
 
+    def doCleanups(self):
+        # cleanup any generated files
+        for file in os.listdir(server.FILESTORE):
+            os.remove(os.path.join(server.FILESTORE, file))
+
 
 if __name__ == '__main__':
     unittest.main()
-    # cleanup any generated files
-    for file in server.FILESTORE:
-        os.remove(file)
