@@ -125,5 +125,11 @@ class MyTestCase(unittest.TestCase):
         result = ops.gradients(self.df2)
         pd.testing.assert_frame_equal(result, expected_result)
 
+    def test_previous(self):
+        expected_result = pd.Series({0: 0.0, 1: 521.0, 2: 550.0, 3: 553.0, 4: 557.0, 5: 563.0}, name="previous")
+
+        result = ops.previous(self.df2)
+        pd.testing.assert_series_equal(result, expected_result)
+
 if __name__ == '__main__':
     unittest.main()

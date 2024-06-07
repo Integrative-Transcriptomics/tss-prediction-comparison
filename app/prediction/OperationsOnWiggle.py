@@ -285,6 +285,22 @@ def gradients(data_frame):
 
     return gradient_data_frame
 
+
+def previous(data_frame):
+    """
+    Computes the previous value for each value in the DataFrame.
+    :param data_frame: Data_frame; col1 -> region, col2 -> position, col3 -> value
+    :return: pandas DataFrame
+    """
+    previous = 0
+    previous_values = []
+    for value in data_frame["value"].values:
+        previous_values += [previous]
+        previous = value
+
+    return pd.Series(previous_values, name="previous")
+
+
 def parse_for_prediction(wiggle_files):
     """
     Computes final pre prepared DataFrame for prediction.
@@ -297,3 +313,6 @@ def parse_for_prediction(wiggle_files):
 
     median_df = median_of_multiple_df(parsed_dfs)
 
+    zscore = z_score(median_df)
+
+    gradient_df = gradients(median_df)
