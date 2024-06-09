@@ -56,7 +56,7 @@ function ProjectForm() {
 
     try {
       // Send the data to the backend
-      const response = await fetch('http://your-backend-url/api/upload', {
+      const response = await fetch('http://localhost:5000/upload', {
         method: 'POST',
         body: formData,
       });

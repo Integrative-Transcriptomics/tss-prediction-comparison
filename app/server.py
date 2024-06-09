@@ -42,109 +42,66 @@ def get_job_by_id(id_):
     else:
         return None
 
-@app.route('/')
-def upload_form():
-    return '''
-    <!doctype html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <title>File Upload and Job Management</title>
-        <style>
-            body { font-family: Arial, sans-serif; }
-            .container { width: 600px; margin: 0 auto; }
-            .form-group { margin-bottom: 1em; }
-            .result { margin-top: 1em; padding: 1em; border: 1px solid #ccc; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>File Upload and Job Management</h1>
-          <div class="form-group">
-            <form id="upload-form" method="post" action="/upload" enctype="multipart/form-data">
-              <input type="file" name="files" multiple>
-              <input type="submit" value="Upload">
-            </form>
-          </div>
-          <div class="form-group">
-            <label for="jobid">Job ID:</label>
-            <input type="text" id="jobid">
-            <button onclick="getFile()">Get File</button>
-            <button onclick="getJobState()">Get Job State</button>
-            <button onclick="getTSS()">Get TSS</button>
-          </div>
-          <div id="result" class="result"></div>
-        </div>
-        <script>
-          document.getElementById('upload-form').onsubmit = async function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const response = await fetch('/upload', {
-              method: 'POST',
-              body: formData
-            });
-            const result = await response.json();
-            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
-          };
-
-          async function getFile() {
-            const jobid = document.getElementById('jobid').value;
-            const response = await fetch(`/get_file?jobid=${jobid}`);
-            if (response.status === 200) {
-              const blob = await response.blob();
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'file';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-            } else {
-              const result = await response.json();
-              document.getElementById('result').innerText = JSON.stringify(result, null, 2);
-            }
-          }
-
-          async function getJobState() {
-            const jobid = document.getElementById('jobid').value;
-            const response = await fetch(`/get_state?jobid=${jobid}`);
-            const result = await response.json();
-            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
-          }
-
-          async function getTSS() {
-            const jobid = document.getElementById('jobid').value;
-            const response = await fetch(`/get_tss?jobid=${jobid}`);
-            const result = await response.json();
-            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
-          }
-        </script>
-      </body>
-    </html>
-    '''
-
 # Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
 # upon sucess
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if request.method == 'POST':
-        files = request.files.getlist("files")
-        paths = []
-        for file in files:
-            file_name, path, file_extension = save_file(file)
-            if file_name:
-                paths.append(path)
-            else:
-                status_code = 422
-                response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
-                return response_object, status_code
 
-        job = JobObject([path], file_name)
-        jobRegistry[job.id] = job
-        jobQueue.put(job)
+        conditions_forward = {}
+        conditions_reverse = {}
 
+        for key in request.files:
+            if key.startswith("condition_"):
+                condition = key.split("condition_")[1].split("_")[0]
+                if "forward" in key:
+                    if condition not in conditions_forward:
+                        conditions_forward[condition] = [key]
+                    else:
+                        conditions_forward[condition] += [key]
+                else:
+                    if condition not in conditions_reverse:
+                        conditions_reverse[condition] = [key]
+                    else:
+                        conditions_reverse[condition] += [key]
+
+        response_json = {}
+        for condition in conditions_forward:
+            paths = []
+            for key in conditions_forward[condition]:
+                file_name, path, file_extension = save_file(request.files.get(key))
+                if file_name:
+                    paths.append(path)
+                else:
+                    status_code = 422
+                    response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                    return response_object, status_code
+
+
+            job = JobObject([path], file_name)
+            jobRegistry[job.id] = job
+            jobQueue.put(job)
+            response_json["Condition " + condition] = {"forward": job.id}
+
+        for condition in conditions_reverse:
+            paths = []
+            for key in conditions_reverse[condition]:
+                file_name, path, file_extension = save_file(request.files.get(key))
+                if file_name:
+                    paths.append(path)
+                else:
+                    status_code = 422
+                    response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                    return response_object, status_code
+
+            job = JobObject([path], file_name)
+            jobRegistry[job.id] = job
+            jobQueue.put(job)
+            response_json["Condition " + condition]["reverse"] = job.id
+
+        print(response_json)
         status_code = 200
-        response_object = jsonify({"jobid": job.id})
+        response_object = jsonify(response_json)
 
         return response_object, status_code
 
