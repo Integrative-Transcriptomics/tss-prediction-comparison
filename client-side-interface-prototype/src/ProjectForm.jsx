@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
 
 function ProjectForm() {
   const [projectName, setProjectName] = useState('');
-  const [conditions, setConditions] = useState([{ id: 1 }]);
+  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef() }]);
+  const gffRef = useRef(null);
+  const tssMasterTableRef = useRef(null);
 
   const addCondition = () => {
-    setConditions([...conditions, { id: conditions.length + 1 }]);
+    setConditions([...conditions, { id: conditions.length + 1, ref: React.createRef() }]);
   };
 
   const deleteCondition = () => {
@@ -23,13 +25,50 @@ function ProjectForm() {
     setProjectName(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Start TSS Prediction button clicked');
-    console.log('Project Name:', projectName);
-    console.log('Conditions:', conditions);
-    // Add logic here to handle form submission
-    console.log('Starting TSS Prediction with project:', projectName);
+
+    // Create FormData object
+    const formData = new FormData();
+
+    // Append the GFF file
+    if (gffRef.current && gffRef.current.file) {
+      formData.append('gff', gffRef.current.file, 'gff-file.gff');
+    }
+
+    // Append the master table file
+    if (tssMasterTableRef.current && tssMasterTableRef.current.file) {
+      formData.append('master_table', tssMasterTableRef.current.file, 'master-table.tsv');
+    }
+
+    // Append the conditions files
+    conditions.forEach((condition, index) => {
+      const conditionRef = condition.ref.current;
+      if (conditionRef) {
+        conditionRef.forwardFiles.forEach((file, idx) => {
+          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
+        });
+        conditionRef.reverseFiles.forEach((file, idx) => {
+          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
+        });
+      }
+    });
+
+    try {
+      // Send the data to the backend
+      const response = await fetch('http://your-backend-url/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log('Files successfully uploaded');
+      } else {
+        console.error('File upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    }
   };
 
   return (
@@ -47,16 +86,16 @@ function ProjectForm() {
       <div className="form-group">
         <label>Data Upload:</label>
         {conditions.map((condition) => (
-          <Condition key={condition.id} id={condition.id} />
+          <Condition key={condition.id} id={condition.id} ref={condition.ref} />
         ))}
         <button className="button" onClick={addCondition}>+</button>
         <button className="button" onClick={deleteCondition}>-</button>
       </div>
       <div>
-        <TssMasterTable />
+        <TssMasterTable ref={tssMasterTableRef} />
       </div>
       <div>
-        <GFF />
+        <GFF ref={gffRef} />
       </div>
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
     </div>

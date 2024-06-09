@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 
-function TssMasterTable() {
+const TssMasterTable = forwardRef((props, ref) => {
   const [file, setFile] = useState(null);
+
+  useImperativeHandle(ref, () => ({
+    file,
+  }));
 
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
@@ -29,6 +33,6 @@ function TssMasterTable() {
       )}
     </div>
   );
-}
+});
 
 export default TssMasterTable;

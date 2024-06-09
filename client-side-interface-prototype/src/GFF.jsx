@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 
-function GFF() {
+const GFF = forwardRef((props, ref) => {
   const [file, setFile] = useState(null);
+
+  useImperativeHandle(ref, () => ({
+    file,
+  }));
 
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
@@ -29,6 +33,6 @@ function GFF() {
       )}
     </div>
   );
-}
+});
 
 export default GFF;
