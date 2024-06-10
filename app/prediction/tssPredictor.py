@@ -13,15 +13,18 @@ with open(classifier_path, 'rb') as f:
 
 def tss_predictor_sklearn(data_frame):
 
-    y = classifier_sklearn.predict(data_frame)
+    if(not data_frame.empty):
+        y = classifier_sklearn.predict(data_frame)
 
-    tss = np.where(y == 1)[0]
+        tss = np.where(y == 1)[0]
 
-    probabilities = classifier_sklearn.predict_proba(data_frame)[tss][:, 1]
+        probabilities = classifier_sklearn.predict_proba(data_frame)[tss][:, 1]
 
-    tss_list = []
+        tss_list = []
 
-    for index, site in enumerate(tss):
-        tss_list.append({"start": int(site), "end": int(site), "confidence": float(probabilities[index])})
+        for index, site in enumerate(tss):
+            tss_list.append({"start": int(site), "end": int(site), "confidence": float(probabilities[index])})
+    else:
+        tss_list = []
 
     return {"TSS Sites": tss_list}
