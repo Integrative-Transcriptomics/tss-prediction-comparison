@@ -9,6 +9,7 @@ venv
 app/store
 app/__pycache__
 tests/__pycache__
+node_modules
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
