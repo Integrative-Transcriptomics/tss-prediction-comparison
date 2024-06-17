@@ -328,4 +328,4 @@ def parse_for_prediction(wiggle_files):
     prediction_df = prediction_df[prediction_df["first gradient"] > 0]
     prediction_df = prediction_df[prediction_df["zscore"] > 0]
 
-    return prediction_df
+    return prediction_df, median_df
