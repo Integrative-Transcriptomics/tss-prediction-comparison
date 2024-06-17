@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "start:backend": "bash ./start_backend.sh",
+    "start:backend": "venv/Scripts/python.exe -m flask --app app/server.py run",
     "start:frontend": "yarn --cwd client-side-interface-prototype vite",
     "start": "npm-run-all --parallel start:backend start:frontend"
   },
