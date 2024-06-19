@@ -139,7 +139,7 @@ class MyTestCase(unittest.TestCase):
          'second gradient': {4: 560.5},
          'previous': {4: 0.0}})
 
-        result = ops.parse_for_prediction([file_path])
+        result, median_df = ops.parse_for_prediction([file_path])
         pd.testing.assert_frame_equal(result, expected_result)
 
 if __name__ == '__main__':
