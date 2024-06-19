@@ -336,4 +336,4 @@ def parse_for_prediction(wiggle_files, reverse = False):
 
     print(prediction_df)
 
-    return prediction_df
+    return prediction_df, median_df

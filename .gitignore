@@ -10,6 +10,8 @@ app/store
 app/__pycache__
 tests/__pycache__
 model_training/data_bacteroides/*
+node_modules
+yarn.lock
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

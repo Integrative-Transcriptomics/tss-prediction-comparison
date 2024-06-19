@@ -16,21 +16,25 @@ with open(classifier_reverse_path, 'rb') as f:
     classifier_reverse = pickle.load(f)
 
 
-def tss_predictor_sklearn(data_frame, reverse = False):
+def tss_predictor_sklearn(data_frame, reverse=False):
 
-    if(reverse):
-        y = classifier_reverse.predict(data_frame)
-        tss = np.where(y == 1)[0]
-        probabilities = classifier_reverse.predict_proba(data_frame)[tss][:, 1]
 
+    if(not data_frame.empty):
+        if(reverse):
+            y = classifier_reverse.predict(data_frame)
+            tss = np.where(y == 1)[0]
+            probabilities = classifier_reverse.predict_proba(data_frame)[tss][:, 1]
+
+        else:
+            y = classifier_forward.predict(data_frame)
+            tss = np.where(y == 1)[0]
+            probabilities = classifier_forward.predict_proba(data_frame)[tss][:, 1]
+
+            tss_list = []
+
+            for index, site in enumerate(tss):
+                tss_list.append({"start": int(site), "end": int(site), "confidence": float(probabilities[index])})
     else:
-        y = classifier_forward.predict(data_frame)
-        tss = np.where(y == 1)[0]
-        probabilities = classifier_forward.predict_proba(data_frame)[tss][:, 1]
-
-    tss_list = []
-
-    for index, site in enumerate(tss):
-        tss_list.append({"start": int(site), "end": int(site), "confidence": float(probabilities[index])})
+        tss_list = []
 
     return {"TSS Sites": tss_list}
