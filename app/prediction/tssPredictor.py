@@ -5,19 +5,28 @@ import os
 
 dirname = os.path.dirname(__file__)
 
-classifier_path = os.path.join(dirname, 'RandomForestClassifierTSSFiltered.pkl')
+classifier_forward_path = os.path.join(dirname, 'RandomForestClassifierTSSFilteredForward.pkl')
 
-with open(classifier_path, 'rb') as f:
-    classifier_sklearn = pickle.load(f)
+classifier_reverse_path = os.path.join(dirname, 'RandomForestClassifierTSSFilteredReverse.pkl')
+
+with open(classifier_forward_path, 'rb') as f:
+    classifier_forward = pickle.load(f)
+
+with open(classifier_reverse_path, 'rb') as f:
+    classifier_reverse = pickle.load(f)
 
 
-def tss_predictor_sklearn(data_frame):
+def tss_predictor_sklearn(data_frame, reverse = False):
 
-    y = classifier_sklearn.predict(data_frame)
+    if(reverse):
+        y = classifier_reverse.predict(data_frame)
+        tss = np.where(y == 1)[0]
+        probabilities = classifier_reverse.predict_proba(data_frame)[tss][:, 1]
 
-    tss = np.where(y == 1)[0]
-
-    probabilities = classifier_sklearn.predict_proba(data_frame)[tss][:, 1]
+    else:
+        y = classifier_forward.predict(data_frame)
+        tss = np.where(y == 1)[0]
+        probabilities = classifier_forward.predict_proba(data_frame)[tss][:, 1]
 
     tss_list = []
 

@@ -2,8 +2,11 @@ import unittest
 import os
 import time
 from unittest import TestCase
-from app import server
 import ast
+import sys
+sys.path.append('../')
+from app import server
+
 
 dirname = os.path.dirname(__file__)
 correct_file = os.path.join(dirname,'test_files/test.wig')

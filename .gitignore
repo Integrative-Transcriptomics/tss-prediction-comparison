@@ -9,6 +9,7 @@ venv
 app/store
 app/__pycache__
 tests/__pycache__
+model_training/data_bacteroides/*
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

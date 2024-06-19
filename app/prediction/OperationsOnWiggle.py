@@ -301,7 +301,7 @@ def previous(data_frame):
     return pd.Series(previous_values, name="previous", index=data_frame.index.values)
 
 
-def parse_for_prediction(wiggle_files):
+def parse_for_prediction(wiggle_files, reverse = False):
     """
     Computes final pre prepared DataFrame for prediction.
     The sum is calculated from the values at position x of column "value" of all DataFrames in lst_of_df
@@ -315,6 +315,8 @@ def parse_for_prediction(wiggle_files):
 
     median_df = median_df.dropna()
 
+    median_df["value"] = median_df["value"].abs() #take abs value
+
     zscore = z_score(median_df)
 
     gradient_df = gradients(median_df)
@@ -325,7 +327,13 @@ def parse_for_prediction(wiggle_files):
                                gradient_df["second gradient"], previous_df], axis=1)
 
     #filtering
-    prediction_df = prediction_df[prediction_df["first gradient"] > 0]
-    prediction_df = prediction_df[prediction_df["zscore"] > 0]
+    if(reverse):
+        prediction_df = prediction_df[prediction_df["first gradient"] < 0]
+        prediction_df = prediction_df[prediction_df["zscore"] > 0]
+    else:
+        prediction_df = prediction_df[prediction_df["first gradient"] > 0]
+        prediction_df = prediction_df[prediction_df["zscore"] > 0]
+
+    print(prediction_df)
 
     return prediction_df
