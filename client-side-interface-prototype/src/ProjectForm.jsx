@@ -18,7 +18,7 @@ function ProjectForm() {
   // Reference for the TSS Master Table component to access its file state.
   const tssMasterTableRef = useRef(null);
 
-  // Use the useHistory hook to navigate to a different page.
+  // Use the useNavigate hook to navigate to a different page.
   const navigate = useNavigate();
 
   // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
@@ -90,7 +90,8 @@ function ProjectForm() {
 
   const handleLoadJobManagement = () => {
     // Navigate to the Job Management page using the navigate function from the useNavigate hook.
-    navigate('/job-management');
+    // in order to pass the project name to the next page (job queue page) we need to modify the navigation call
+    navigate('/job-management', { state: { projectName: projectName } });
   };
 
   return (
