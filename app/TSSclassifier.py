@@ -1,13 +1,14 @@
 import pandas as pd
 import GFFParser as ps
 from enum import Enum
+from json import loads, dumps
 
 
 class TSSType(Enum):
     PRIMARY = "pTSS/sTSS"
     INTERNAL = "iTSS"
     ANTISENSE = "asTSS"
-    OTHER = "other"
+    ORPHAN = "orphan"
 
 
 def classify(filepath, TSS_dict, strand):
@@ -41,7 +42,7 @@ def classify(filepath, TSS_dict, strand):
             possible_class.append(TSSType.ANTISENSE.value)
 
         if len(possible_class) == 0:
-            possible_class = [TSSType.OTHER.value]
+            possible_class = [TSSType.ORPHAN.value]
 
         tss_classified[tss] = possible_class
 
@@ -53,7 +54,6 @@ def classify(filepath, TSS_dict, strand):
 
 
 def find_common_tss(prediction, master_table, strand):
-
     if (strand == "+"):
         mt_relevant_columns = master_table[master_table['strand'] == '+']
 
@@ -61,8 +61,6 @@ def find_common_tss(prediction, master_table, strand):
         mt_relevant_columns = master_table[master_table['strand'] == '-']
 
     mt_relevant_columns = mt_relevant_columns[['TSS site', 'TSS type']].reset_index(drop=True)
-
-   # print (mt_relevant_columns)
 
     #common_tss_df = pd.merge(prediction, mt_relevant_columns, on=['TSS site', 'TSS type'], how='inner')
 
@@ -79,49 +77,15 @@ def find_common_tss(prediction, master_table, strand):
 
 def to_csv(df1, df2, master_table):
     mt_relevant_columns = master_table[['TSS site', 'TSS type']]
-    dfs = [(df1, 'prediction'), (df2, 'shared tss'), (mt_relevant_columns, 'master Table')]
+    dfs = [(df1, 'prediction'), (df2, 'shared_TSS'), (mt_relevant_columns, 'TSS_predator')]
 
-    csv_file = 'comparison.csv'
-    with open(csv_file, 'w', newline='') as f:
-        for df, name in dfs:
-            freq = calculate_frequency_of_tss_classes(df)
-
-            f.write(f"{name}\n")
-            f.write(f"freq: primary/secondary:{freq['pTSS/sTSS']}, internal:{freq['iTSS']}, antisense: {freq['asTSS']}, other: {freq['other']}\n")
+    for df, name in dfs:
+        csv_file = f'{name}.csv'
+        with open(csv_file, 'w', newline='') as f:
             df.to_csv(f, index=False)
 
 
-def to_excel(our_prediction, df2, master_table):
-    mt_relevant_columns = master_table[['TSS site', 'TSS type']]
-    dfs = [(our_prediction, 'prediction'), (df2, 'shared tss'), (mt_relevant_columns, 'master table')]
-
-    excel_file = 'comparison.xlsx'
-    with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
-        for df, name in dfs:
-            freq = calculate_frequency_of_tss_classes(df)
-            df.to_excel(writer, sheet_name=name, index=False)
-            worksheet = writer.sheets[name]
-
-            start_col = df.shape[1] + 1
-            worksheet.write(0, start_col, 'Frequency Data')
-
-            row = 1
-            for label, value in freq.items():
-                worksheet.write(row, start_col, label)
-                worksheet.write(row, start_col + 1, value)
-                row += 1
-
-        worksheet = writer.sheets["shared tss"]
-
-        metrics = [
-            ("recall", len(df2.index) / len(master_table.index)),
-            ("precision", len(df2.index) / len(our_prediction.index))
-        ]
-        for i, (label, value) in enumerate(metrics):
-            worksheet.write(i, df2.shape[1] + 4, label)
-            worksheet.write(i, df2.shape[1] + 5, value)
-
-
+# fehler wenn df leer ist
 def calculate_frequency_of_tss_classes(common_tss_df):
     type_counts = common_tss_df['TSS type'].value_counts()
     all_types = [e.value for e in TSSType]
@@ -132,12 +96,27 @@ def calculate_frequency_of_tss_classes(common_tss_df):
     return relative_frequencies
 
 
+def recall_and_precision_return_obj(common_tss_df, prediction_df, master_table_df):
+    result_dict = {"recall": len(common_tss_df.index) / len(master_table_df.index),
+                   "precision": len(common_tss_df.index) / len(prediction_df.index)}
+    result_json = loads(dumps(result_dict))
+    return result_json
+
+
+def freq_return_obj(common_tss_df, prediction_df, master_table_df):
+    result_dict = {'common_tss': calculate_frequency_of_tss_classes(common_tss_df).to_dict(),
+                   'prediction': calculate_frequency_of_tss_classes(prediction_df).to_dict(),
+                   'TSS_predator': calculate_frequency_of_tss_classes(master_table_df).to_dict()}
+    result_json = loads(dumps(result_dict))
+    return result_json
+
+
 mt = {
-    'TSS site': [25675, 31366, 31650, 32000],
-    'TSS type': ["iTSS", "asTSS", "pTSS/sTSS", "asTSS"],
-    'detected': ['1', '1', '1', '0'],
-    'Locus_tag': ['esdnc', 'aada', 'Wqwq', 'wwisd'],
-    'strand': ["+", "-", "+", "+"]
+    'TSS site': [25675, 31366, 31650, 32000, 405, 400],
+    'TSS type': ["iTSS", "asTSS", "pTSS/sTSS", "asTSS", "iTSS", "pTSS/sTSS"],
+    'detected': ['1', '1', '1', '0', '1', '1'],
+    'Locus_tag': ['esdnc', 'aada', 'Wqwq', 'wwisd', 'wwisd', 'wwisd'],
+    'strand': ["+", "-", "+", "+", "+", "+"]
 }
 
 df = pd.DataFrame(mt)
@@ -146,7 +125,7 @@ cl = classify("../tests/test_files/NC_004703.gff", {"TSS Sites": [400, 25675, 31
 print(cl)
 co = find_common_tss(cl, df, "+")
 print(co)
-#print(calculate_frequency_of_tss_classes(cl)["iTSS"])
-#to_csv(cl, co, df)
-to_excel(cl, co, df)
+to_csv(cl, co, df)
 
+print(freq_return_obj(cl, co, df))
+print(recall_and_precision_return_obj(co, cl, df))
