@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -16,6 +17,9 @@ function ProjectForm() {
   
   // Reference for the TSS Master Table component to access its file state.
   const tssMasterTableRef = useRef(null);
+
+  // Use the useHistory hook to navigate to a different page.
+  const navigate = useNavigate();
 
   // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
   const addCondition = () => {
@@ -84,6 +88,11 @@ function ProjectForm() {
     }
   };
 
+  const handleLoadJobManagement = () => {
+    // Navigate to the Job Management page using the navigate function from the useNavigate hook.
+    navigate('/job-management');
+  };
+
   return (
     <div className="project-form">
       <h1>TSS Prediction Tool</h1>
@@ -125,6 +134,8 @@ function ProjectForm() {
       
       {/* Submit Button */}
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
+      {/* Job Management Page Button */}
+      <button className="load-job-button" onClick={handleLoadJobManagement}>Load Job-Management Page</button>
     </div>
   );
 }
