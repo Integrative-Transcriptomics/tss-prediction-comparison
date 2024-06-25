@@ -11,8 +11,7 @@ class TSSType(Enum):
     ORPHAN = "orphan"
 
 
-def classify(filepath, TSS_dict, strand):
-    gff_df = ps.parse_gff_to_df(filepath)
+def classify(gff_df, TSS_dict, strand):
     tss_classified = {}
 
     gff_fw = gff_df[(gff_df['strand'] == "+")]
