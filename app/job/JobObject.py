@@ -59,6 +59,7 @@ class JobObject:
 
         if(not self.gff_path is None):
             gff_df = ps.parse_gff_to_df(self.gff_path)
+            #ToDO include confidence values in df
             self.classified_tss = cs.classify(gff_df, tss_list, self.is_reverse_strand)
         if(not self.master_table_path is None):
             self.master_table = mtp.parse_master_table_to_df(self.master_table_path)
