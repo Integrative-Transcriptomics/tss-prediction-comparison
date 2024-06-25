@@ -20,6 +20,6 @@ def __delete_unwanted_columns(wanted_columns, df):
             else: del df[col]
 
 
-file = file_path = 'tests/test_files/MasterTable_Example.xlsx'
-df = parse_master_table_to_df(file)
-print(df)
+#file = file_path = 'tests/test_files/MasterTable_Example.xlsx'
+#df = parse_master_table_to_df(file)
+#print(df)

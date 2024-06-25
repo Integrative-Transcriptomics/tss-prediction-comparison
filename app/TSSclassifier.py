@@ -1,7 +1,7 @@
 import pandas as pd
 from enum import Enum
 from json import loads, dumps
-import GFFParser as ps
+from app import GFFParser as ps
 
 class TSSType(Enum):
     PRIMARY = "pTSS/sTSS"

@@ -31,7 +31,10 @@ class JobObject:
         if self.status == JobStatus.FINISHED:
 
             if(type == returnType.TSS):
-                return self.classified_tss
+                if(self.gff_path is None):
+                    raise NotSuppliedException("The gff file was not supplied")
+                else:
+                    return self.classified_tss
             if(type == returnType.COMMON):
                 if(self.common_tss is None):
                     raise NotSuppliedException("The Master Table or gff file was not supplied")
@@ -57,11 +60,14 @@ class JobObject:
         self.processedDF = median_df
         tss_list, confidence_list = tss_predictor_sklearn(dataframe_to_predict)
 
-        if(not self.gff_path is None):
+        print(tss_list, confidence_list)
+
+        if(not (self.gff_path is None)):
             gff_df = ps.parse_gff_to_df(self.gff_path)
             #ToDO include confidence values in df
             self.classified_tss = cs.classify(gff_df, tss_list, self.is_reverse_strand)
-        if(not self.master_table_path is None):
+            print(self.classified_tss)
+        if(not (self.master_table_path is None)):
             self.master_table = mtp.parse_master_table_to_df(self.master_table_path)
             self.common_tss = cs.find_common_tss(self.classified_tss, self.master_table)
 
