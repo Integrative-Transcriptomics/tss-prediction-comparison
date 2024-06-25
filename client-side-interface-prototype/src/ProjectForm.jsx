@@ -47,6 +47,11 @@ function ProjectForm() {
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
 
+    // Append the name of the project to the FormData object if it exists.
+    if (projectName) {
+      formData.append('projectName', projectName);
+    }
+
     // Append the GFF file to the FormData object if it exists.
     if (gffRef.current && gffRef.current.file) {
       formData.append('gff', gffRef.current.file, 'gff-file.gff');
