@@ -1,13 +1,15 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from app.api.allowedFileTypes import FileEndings
 from app.job.jobProcessor import job_processor
 from app.job.JobObject import JobObject
-from app.job.NotReadyException import NotReadyException
+from app.job.JobObject import returnType
+from app.job.JobExceptions import NotReadyException
 from json import loads, dumps
 import threading
 import queue
+import io
 
 app = Flask(__name__)
 dirname = os.path.dirname(__file__)
@@ -43,6 +45,17 @@ def get_job_by_id(id_):
     else:
         return None
 
+# turn dataframe into csv object for response endpoints
+def df_to_response(df, filename):
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0) #reset buffer
+
+    response = Response(buffer, mimetype='text/csv')
+    response.headers["Content-Disposition"] = "attachment; filename=" + filename
+
+    return response
+
 # Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
 # upon sucess
 @app.route("/upload", methods=["POST"])
@@ -51,6 +64,9 @@ def upload_file():
 
         conditions_forward = {}
         conditions_reverse = {}
+
+        gff_path = None
+        master_table_path = None
 
         for key in request.files:
             print(key)
@@ -69,6 +85,26 @@ def upload_file():
                     else:
                         conditions_reverse[condition] += [key]
 
+                if(key == "gff"):
+                    file_name, path, file_extension = save_file(request.files.get(key))
+
+                    if file_name:
+                        gff_path = path
+                    else:
+                        status_code = 422
+                        response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                        return response_object, status_code
+
+                if (key == "master_table"):
+                    file_name, path, file_extension = save_file(request.files.get(key))
+
+                    if file_name:
+                        master_table_path = path
+                    else:
+                        status_code = 422
+                        response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                        return response_object, status_code
+
         response_json = {}
         for condition in conditions_forward:
             paths = []
@@ -82,7 +118,7 @@ def upload_file():
                     return response_object, status_code
 
 
-            job = JobObject([path], file_name)
+            job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
             jobRegistry[job.id] = job
             jobQueue.put(job)
             response_json["Condition " + condition] = {"forward": job.id}
@@ -98,7 +134,7 @@ def upload_file():
                     response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
                     return response_object, status_code
 
-            job = JobObject([path], file_name)
+            job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=True)
             jobRegistry[job.id] = job
             jobQueue.put(job)
             response_json["Condition " + condition]["reverse"] = job.id
@@ -160,9 +196,47 @@ def get_tss_by_id():
         job = get_job_by_id(id)
         if job:
             try:
-                return_object = job.get_return_object()
+                tss_df = job.get_file(returnType.TSS)
+                response_object = df_to_response(tss_df)
                 status_code = 200
-                response_object = jsonify(return_object)
+            except NotReadyException as e:
+                status_code = 400
+                response_object = jsonify({"Error": e.message})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
+# gets tss comparison by id. Fails if Job state is not finished.
+@app.route("/get_common", methods=["GET"])
+def get_tss_by_id():
+    if request.method == 'GET':
+        id = request.args.get('jobid', type=str)
+        job = get_job_by_id(id)
+        if job:
+            try:
+                common_df = job.get_file(returnType.COMMON)
+                response_object = df_to_response(common_df)
+                status_code = 200
+            except NotReadyException as e:
+                status_code = 400
+                response_object = jsonify({"Error": e.message})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
+# gets master table by id. Fails if Job state is not finished.
+@app.route("/get_master_table", methods=["GET"])
+def get_tss_by_id():
+    if request.method == 'GET':
+        id = request.args.get('jobid', type=str)
+        job = get_job_by_id(id)
+        if job:
+            try:
+                master_df = job.get_file(returnType.MASTERTABLE)
+                response_object = df_to_response(master_df)
+                status_code = 200
             except NotReadyException as e:
                 status_code = 400
                 response_object = jsonify({"Error": e.message})

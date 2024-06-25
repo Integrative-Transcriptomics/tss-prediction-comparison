@@ -1,5 +1,4 @@
 import pandas as pd
-import GFFParser as ps
 from enum import Enum
 from json import loads, dumps
 
@@ -12,6 +11,7 @@ class TSSType(Enum):
 
 
 def classify(gff_df, TSS_dict, strand):
+
     tss_classified = {}
 
     gff_fw = gff_df[(gff_df['strand'] == "+")]
