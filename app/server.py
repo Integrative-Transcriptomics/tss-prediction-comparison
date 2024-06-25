@@ -85,25 +85,25 @@ def upload_file():
                     else:
                         conditions_reverse[condition] += [key]
 
-                if(key == "gff"):
-                    file_name, path, file_extension = save_file(request.files.get(key))
+            if (key == "gff"):
+                file_name, path, file_extension = save_file(request.files.get(key))
 
-                    if file_name:
-                        gff_path = path
-                    else:
-                        status_code = 422
-                        response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
-                        return response_object, status_code
+                if file_name:
+                    gff_path = path
+                else:
+                    status_code = 422
+                    response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                    return response_object, status_code
 
-                if (key == "master_table"):
-                    file_name, path, file_extension = save_file(request.files.get(key))
+            if (key == "master_table"):
+                file_name, path, file_extension = save_file(request.files.get(key))
 
-                    if file_name:
-                        master_table_path = path
-                    else:
-                        status_code = 422
-                        response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
-                        return response_object, status_code
+                if file_name:
+                    master_table_path = path
+                else:
+                    status_code = 422
+                    response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
+                    return response_object, status_code
 
         response_json = {}
         for condition in conditions_forward:
@@ -197,7 +197,7 @@ def get_tss_by_id():
         if job:
             try:
                 tss_df = job.get_file(returnType.TSS)
-                response_object = df_to_response(tss_df)
+                response_object = df_to_response(tss_df, "tss_prediction.csv")
                 status_code = 200
             except NotReadyException as e:
                 status_code = 400
@@ -209,14 +209,14 @@ def get_tss_by_id():
 
 # gets tss comparison by id. Fails if Job state is not finished.
 @app.route("/get_common", methods=["GET"])
-def get_tss_by_id():
+def get_common_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
         job = get_job_by_id(id)
         if job:
             try:
                 common_df = job.get_file(returnType.COMMON)
-                response_object = df_to_response(common_df)
+                response_object = df_to_response(common_df, "common_prediction.csv")
                 status_code = 200
             except NotReadyException as e:
                 status_code = 400
@@ -228,14 +228,14 @@ def get_tss_by_id():
 
 # gets master table by id. Fails if Job state is not finished.
 @app.route("/get_master_table", methods=["GET"])
-def get_tss_by_id():
+def get_master_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
         job = get_job_by_id(id)
         if job:
             try:
                 master_df = job.get_file(returnType.MASTERTABLE)
-                response_object = df_to_response(master_df)
+                response_object = df_to_response(master_df, "master_table.csv")
                 status_code = 200
             except NotReadyException as e:
                 status_code = 400

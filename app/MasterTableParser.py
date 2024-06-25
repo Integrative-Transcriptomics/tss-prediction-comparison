@@ -49,6 +49,12 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
     return data_frame
 
 
+<<<<<<< HEAD
 file_path = "../tests/test_files/MasterTable_chrom.tsv"
 df = parse_master_table_to_df(file_path)
 print(df)
+=======
+#file = file_path = 'tests/test_files/MasterTable_Example.xlsx'
+#df = parse_master_table_to_df(file)
+#print(df)
+>>>>>>> c2d8026603299c002bf7902d017fdc10cbdb2a51
