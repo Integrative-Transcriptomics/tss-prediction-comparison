@@ -6,37 +6,47 @@ TSS_types = ["Primary", "Secondary", "Internal", "Antisense"]
 
 
 def parse_master_table_to_df(master_table):
-    df = pd.read_csv(master_table)
+    df = pd.read_csv(master_table, sep='\t', index_col="Pos")
     print(df)
+
+    df = df[~df.index.duplicated(keep='first')]
+    print(df)
+
+    # delete not detected positions
+    #positions = df["Pos"]
+    #for row_index in range(len(positions)):
+    #    if df.at[row_index, "detected"] == "0":
+    #        df.drop(df.index[row_index], inplace=True)
+
     df = __delete_unwanted_columns(df, wanted_columns)
-    df = __sumarize_TSS_types(df)
-    positions = df["Pos"]
-    for row_index in range(len(positions)):
-        if df.at[row_index, "detected"] == 0:
-            df.drop(df.index[row_index], inplace=True)
+    df = __summarize_TSS_types(df)
     return df
 
 
-def __sumarize_TSS_types(data_frame):
-    data_frame["TSS type"] = []
+def __summarize_TSS_types(data_frame):
+    summarized_type_column = []
     positions = data_frame["Pos"]
     for row_index in range(len(positions)):
         for type in TSS_types:
             if data_frame.at[row_index, type] == 1:
-                data_frame.at[row_index, "TSS_type"] = type
+                summarized_type_column.append(type)
+                break
+
+    # debug line
+    print(len(summarized_type_column))
+
+    data_frame["TSS type"] = summarized_type_column
     return __delete_unwanted_columns(data_frame, ["detected", "Pos", "Strand", "TSS type"])
 
 
 def __delete_unwanted_columns(data_frame, wanted_columns):
-    columns = data_frame.columns[0].split("\t")
+    columns = data_frame.columns.tolist()
     for col in columns:
-        for wanted_col in wanted_columns:
-            if col == wanted_col:
-                continue
-            else:
-                data_frame = data_frame.drop(columns=[col])
+        if col in wanted_columns:
+            continue
+        else:
+            data_frame = data_frame.drop(columns=[col])
     return data_frame
-
 
 
 file_path = "../tests/test_files/MasterTable_chrom.tsv"
