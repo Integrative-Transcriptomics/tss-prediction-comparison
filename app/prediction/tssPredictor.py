@@ -30,13 +30,13 @@ def tss_predictor_sklearn(data_frame, reverse=False):
             tss = np.where(y == 1)[0]
             probabilities = classifier_forward.predict_proba(data_frame)[tss][:, 1]
 
-            tss_list = []
+        tss_list = []
 
-            confidence_list = []
+        confidence_list = []
 
-            for index, site in enumerate(tss):
-                tss_list.append(site)
-                confidence_list.append(float(probabilities[index]))
+        for index, site in enumerate(tss):
+            tss_list.append(site)
+            confidence_list.append(float(probabilities[index]))
     else:
         tss_list = []
         confidence_list = []

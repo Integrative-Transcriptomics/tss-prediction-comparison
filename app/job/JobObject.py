@@ -41,7 +41,7 @@ class JobObject:
                 if(self.master_table is None):
                     raise NotSuppliedException("The Master Table was not supplied")
                 else:
-                    return  self.master_table
+                    return self.master_table
             else:
                 raise Exception("Unknown filetype")
         else:
