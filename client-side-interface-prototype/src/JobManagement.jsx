@@ -39,6 +39,7 @@ function JobManagement() {
     <div>
       <h1>Job Management</h1>
       <p>Project Name: {projectName}</p>
+      {/* Temporary code for printing the json file as text in order to test if we receive data from the backend*/}
       <div>{jsonData ? JSON.stringify(jsonData) : 'Data cannot be printed'}</div>
     </div>
   );
