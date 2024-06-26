@@ -1,33 +1,43 @@
 import pandas as pd
 
 
-wanted_columns = ["detected", "Pos", "Strand", "Primary", "Secondary", "Internal", "Antisense"]
-TSS_types = ["Primary", "Secondary", "Internal", "Antisense"]
+WANTED_COLUMNS = ["detected", "Pos", "Strand", "Primary", "Secondary", "Internal", "Antisense"]
+TSS_TYPES = ["Primary", "Secondary", "Internal", "Antisense"]
 
 
 def parse_master_table_to_df(master_table):
+
+    # parse tsv and take "Pos" column as index
     df = pd.read_csv(master_table, sep='\t', index_col="Pos")
     print(df)
-
+    # delete all duplicate lines (oriented on "Pos" column)
     df = df[~df.index.duplicated(keep='first')]
     print(df)
+    # add index column "Pos" as normal col to df
+    df = df.reset_index()
+    print(df)
 
-    # delete not detected positions
-    #positions = df["Pos"]
-    #for row_index in range(len(positions)):
-    #    if df.at[row_index, "detected"] == "0":
-    #        df.drop(df.index[row_index], inplace=True)
-
-    df = __delete_unwanted_columns(df, wanted_columns)
-    df = __summarize_TSS_types(df)
+    df = __delete_not_detected_positions(df)
+    df = __delete_unwanted_columns(df, WANTED_COLUMNS)
+    df = __summarize_TSS_TYPES(df)
     return df
 
+def __delete_duplicates(data_frame):
+    return None
 
-def __summarize_TSS_types(data_frame):
+
+def __delete_not_detected_positions(data_frame):
+    positions = data_frame["Pos"]
+    for pos in positions:
+        if data_frame.at[pos, "detected"] == "0":
+            data_frame.drop(data_frame.index[pos], inplace=True)
+    return data_frame
+
+def __summarize_TSS_TYPES(data_frame):
     summarized_type_column = []
     positions = data_frame["Pos"]
     for row_index in range(len(positions)):
-        for type in TSS_types:
+        for type in TSS_TYPES:
             if data_frame.at[row_index, type] == 1:
                 summarized_type_column.append(type)
                 break
@@ -49,12 +59,6 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
     return data_frame
 
 
-<<<<<<< HEAD
 file_path = "../tests/test_files/MasterTable_chrom.tsv"
 df = parse_master_table_to_df(file_path)
 print(df)
-=======
-#file = file_path = 'tests/test_files/MasterTable_Example.xlsx'
-#df = parse_master_table_to_df(file)
-#print(df)
->>>>>>> c2d8026603299c002bf7902d017fdc10cbdb2a51
