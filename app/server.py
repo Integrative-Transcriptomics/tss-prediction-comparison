@@ -5,6 +5,7 @@ from app.api.allowedFileTypes import FileEndings
 from app.job.jobProcessor import job_processor
 from app.job.JobObject import JobObject
 from app.job.NotReadyException import NotReadyException
+from json import loads, dumps
 import threading
 import queue
 
@@ -44,7 +45,7 @@ def get_job_by_id(id_):
 
 # Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
 # upon sucess
-@app.route("/upload", methods=["POST"])
+@app.route("/api/upload", methods=["POST"])
 def upload_file():
     if request.method == 'POST':
 
@@ -52,9 +53,12 @@ def upload_file():
         conditions_reverse = {}
 
         for key in request.files:
+            print(key)
             if key.startswith("condition_"):
                 condition = key.split("condition_")[1].split("_")[0]
+
                 if "forward" in key:
+
                     if condition not in conditions_forward:
                         conditions_forward[condition] = [key]
                     else:
@@ -107,13 +111,25 @@ def upload_file():
 
 
 # get file by id endpoint. Returns the wiggle file if a job with given id exists
-@app.route("/get_file", methods=["GET"])
+@app.route("/api/get_file", methods=["GET"])
 def get_wiggle_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
         job = get_job_by_id(id)
         if job:
-            return send_from_directory(FILESTORE, job.name)
+            try:
+                mean_df = job.get_processed_df()
+            except NotReadyException as e:
+                status_code = 400
+                response_object = jsonify({"Error": e.message})
+                return response_object, status_code
+
+            return_df = mean_df.to_json()
+            parsed_json = loads(return_df)
+
+            status_code = 200
+
+            return parsed_json, status_code
         else:
             status_code = 404
             response_object = jsonify({"Error": "No file found with id: " + id})
@@ -121,7 +137,7 @@ def get_wiggle_by_id():
 
 
 # gets job state by id. Returns job state ("Not started", "Running", "Finished", "Failed") if job exists
-@app.route("/get_state", methods=["GET"])
+@app.route("/api/get_state", methods=["GET"])
 def get_job_state_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
@@ -137,7 +153,7 @@ def get_job_state_by_id():
 
 
 # gets tss prediction by id. Fails if Job state is not finished.
-@app.route("/get_tss", methods=["GET"])
+@app.route("/api/get_tss", methods=["GET"])
 def get_tss_by_id():
     if request.method == 'GET':
         id = request.args.get('jobid', type=str)
