@@ -3,11 +3,6 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 function JobManagement() {
-  // to access the projectName we access the passed state from the first page with useLocation
-  const location = useLocation();
-  // if the projectName is undefined for whatever reason the default projectName is empty
-  const { projectName } = location.state || { projectName: 'Default Project Name' };
-
   // To test whether or not the backend sends a .json we fetch the response from the backend endpoint that 
   // sends the .json. In our case the endpoint is '/upload'.
   // statevariable for storing the jsondata we (hopefully) receive
