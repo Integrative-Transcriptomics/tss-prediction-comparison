@@ -16,13 +16,13 @@ class TSS_TYPES(Enum):
 WANTED_COLUMNS = ["Condition", "detected", "Pos", "Strand", "Primary", "Secondary", "Internal", "Antisense", "Locus_tag"]
 
 
-def parse_master_table_to_df(master_table):
+def parse_master_table(master_table):
     """
     Parses a MasterTable in TSV format and returns a dictionary,
     which holds parsed data for each condition of MasterTable data.
     The created DataFrames hold only detected Positions and the columns: "Pos", "Strand", "TSS-type".
     :param master_table:
-    :return: dictionary with condition as key and data_frame with parsed data as value
+    :return: dictionary with condition as key and data_frame with corresponding parsed data as value
     """
     df = pd.read_csv(master_table, sep="\t")
     df = __delete_unwanted_columns(df, WANTED_COLUMNS)
@@ -126,8 +126,9 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
     return data_frame
 
 
-file_path = "../tests/test_files/SmallMasterTable.tsv"
-dfs = parse_master_table_to_df(file_path)
+# example output for testfile:
+file_path = "../tests/test_files/TestFile2MasterTable.tsv"
+dfs = parse_master_table(file_path)
 for condition in dfs.keys():
     print("condition: " + condition + "\n")
     print(dfs.get(condition))
