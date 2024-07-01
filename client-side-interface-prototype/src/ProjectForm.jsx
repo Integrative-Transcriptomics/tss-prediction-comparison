@@ -77,7 +77,7 @@ function ProjectForm() {
 
     try {
       // Send the FormData object to the backend using a POST request.
-      const response = await fetch('http://127.0.0.1:5000/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
