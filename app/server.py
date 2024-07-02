@@ -87,6 +87,12 @@ def upload_file():
         gff_path = None
         master_table_path = None
 
+        project_name = "unknown"
+
+        project_name_form = request.form.get("projectName")
+        if(project_name_form):
+            project_name = project_name_form
+
         for key in request.files:
             print(key)
             if key.startswith("condition_"):
@@ -163,7 +169,7 @@ def upload_file():
 
             conditionRegistry[condition_object.id] = condition_object
 
-        project_object = ProjectObject(project_name="Project Name not implemented", condition_dict=conditionRegistry)
+        project_object = ProjectObject(project_name=project_name, condition_dict=conditionRegistry)
 
         projectRegistry[project_object.id] = project_object
 
