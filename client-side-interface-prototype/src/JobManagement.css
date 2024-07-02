@@ -1,0 +1,17 @@
+
+.status-not-started {
+    color: gray;
+  }
+  
+  .status-running {
+    color: blue;
+  }
+  
+  .status-finished {
+    color: green;
+  }
+  
+  .status-failed {
+    color: red;
+  }
+  
