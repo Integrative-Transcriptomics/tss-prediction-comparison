@@ -115,3 +115,17 @@ button:hover {
 .error {
   color: red;
 }
+
+.load-job-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.load-job-button:hover {
+  background-color: #0056b3;
+}
