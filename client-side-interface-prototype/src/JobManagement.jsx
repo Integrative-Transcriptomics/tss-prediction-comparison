@@ -7,7 +7,7 @@ function JobManagement() {
   const [masterTableFiles, setMasterTableFiles] = useState([]);
 
 
-  // IDs for manually testing the fetch operation
+  // Dummy IDs for manually testing the fetch operation, adjust ids everytime you start a new prediction
   // condition 1, forward
   const uuid1 = 'f3b37787-e8f6-4921-859c-d00efffcbfe6';
   // condition 1, reverse
