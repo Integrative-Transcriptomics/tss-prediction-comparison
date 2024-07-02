@@ -85,7 +85,7 @@ const TSSDistributionPie = () => {
   return (
     <div>
       <h2>TSS Type Distribution</h2>
-      <ReactECharts option={option} style={{ height: '600px', width: '90%' }} />
+      <ReactECharts option={option} style={{ height: '600px', width: '100%' }} />
     </div>
   );
 };
