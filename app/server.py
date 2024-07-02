@@ -339,5 +339,22 @@ def get_jobids():
 
         return response_object, status_code
 
+# gets gff file for a given job id.
+@app.route("/api/get_gff", methods=["GET"])
+def get_gff():
+    if request.method == 'GET':
+        id = request.args.get('jobid', type=str)
+        job = get_job_by_id(id)
+        if job:
+            if(jobRegistry[id].gff_path != None):
+                return send_from_directory(FILESTORE, os.path.basename(jobRegistry[id].gff_path))
+            else:
+                status_code = 400
+                response_object = jsonify({"Error": "No gff file was supplied for job with id : " + id})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
 if __name__ == "__main__":
     app.run(debug=True)
