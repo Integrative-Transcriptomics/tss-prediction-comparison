@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -16,6 +17,9 @@ function ProjectForm() {
   
   // Reference for the TSS Master Table component to access its file state.
   const tssMasterTableRef = useRef(null);
+
+  // Use the useNavigate hook to navigate to a different page.
+  const navigate = useNavigate();
 
   // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
   const addCondition = () => {
@@ -42,6 +46,11 @@ function ProjectForm() {
 
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
+
+    // Append the name of the project to the FormData object if it exists.
+    if (projectName) {
+      formData.append('projectName', projectName);
+    }
 
     // Append the GFF file to the FormData object if it exists.
     if (gffRef.current && gffRef.current.file) {
@@ -82,6 +91,12 @@ function ProjectForm() {
     } catch (error) {
       console.error('Error uploading files:', error);
     }
+  };
+
+  const handleLoadJobManagement = () => {
+    // Navigate to the Job Management page using the navigate function from the useNavigate hook.
+    // in order to pass the project name to the next page (job queue page) we need to modify the navigation call
+    navigate('/job-management', { state: { projectName: projectName } });
   };
 
   return (
@@ -125,6 +140,8 @@ function ProjectForm() {
       
       {/* Submit Button */}
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
+      {/* Job Management Page Button */}
+      <button className="load-job-button" onClick={handleLoadJobManagement}>Load Job-Management Page</button>
     </div>
   );
 }
