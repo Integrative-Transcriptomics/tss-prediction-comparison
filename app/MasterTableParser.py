@@ -127,9 +127,9 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
 
 
 # example output for testfile:
-file_path = "../tests/test_files/TestFile2MasterTable.tsv"
-dfs = parse_master_table(file_path)
-for condition in dfs.keys():
-    print("condition: " + condition + "\n")
-    print(dfs.get(condition))
-    print("\n")
+#file_path = "../tests/test_files/TestFile2MasterTable.tsv"
+#dfs = parse_master_table(file_path)
+#for condition in dfs.keys():
+    #print("condition: " + condition + "\n")
+    #print(dfs.get(condition))
+    #print("\n")
