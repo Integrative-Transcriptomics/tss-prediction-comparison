@@ -141,7 +141,7 @@ function ProjectForm() {
       {/* Submit Button */}
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
       {/* Job Management Page Button */}
-      <button className="load-job-button" onClick={handleLoadJobManagement}>Load Job-Management Page</button>
+      <button className="load-job-button" onClick={handleLoadJobManagement}>Load Project-Manager</button>
     </div>
   );
 }

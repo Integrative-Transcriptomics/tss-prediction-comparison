@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import './JobManagement.css';
 
 function JobManagement() {
 
@@ -127,29 +128,31 @@ function JobManagement() {
   // Render the list of projects, conditions, and job statuses
   return (
     <div className="App">
-      <h1>Projects</h1>
-      <ul>
-        {projects.map(([projectId, projectName]) => (
-          <li key={projectId} className="project-box">
-            <h2>{projectName}</h2>
-            <ul>
-              {projectConditions[projectId]?.map(([conditionName, conditionId]) => (
-                <li key={conditionId} className="condition-box">
-                  <h3>{conditionName}</h3>
-                  <ul>
-                    <li>
-                      Forward Job ID: {conditionsJobs[conditionId]?.forward}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.forward])}
-                    </li>
-                    <li>
-                      Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
-                    </li>
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
+      <div className="projects-container">
+        <h1>Project Manager</h1>
+        <ul>
+          {projects.map(([projectId, projectName]) => (
+            <div key={projectId} className="project-box">
+              <h2>{projectName}</h2>
+              <ul>
+                {projectConditions[projectId]?.map(([conditionName, conditionId]) => (
+                  <li key={conditionId} className="condition-box">
+                    <h3>{conditionName}</h3>
+                    <ul>
+                      <li>
+                        Forward Job ID: {conditionsJobs[conditionId]?.forward}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.forward])}
+                      </li>
+                      <li>
+                        Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
+                      </li>
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
