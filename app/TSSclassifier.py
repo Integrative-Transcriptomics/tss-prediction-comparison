@@ -30,29 +30,31 @@ class GffFormatException(Exception):
     pass
 
 
-def classify(gff_df, TSS_list, strand):
+def classify(gff_df, tss_list, confidence_list, strand):
     """
     Classifies TSS based on their position relative to genes in a GFF file.
-    :param gff_df:  DataFrame containing information from a GFF file.
-    :param TSS_list: a list of all predicted TSS
+    :param gff_df:  DataFrame containing information from a GFF file
+    :param tss_list: a list of all predicted TSS
+    :param confidence_list: list that assigns a confidence value to each of the TSS in tss_list
     :param strand: the strand on which the TSS were predicted(True for reverse and False for forward)
-    :return: tss_classified: data frame that holds the position, classified type, and corresponding gene name of the TSS
+    :return: tss_classified: data frame that contains the position, classified type, confidence value,
+    and corresponding gene name of the TSS
     """
-    #gff_df = ps.parse_gff_to_df(gff_df)
+    gff_df = ps.parse_gff_to_df(gff_df)
 
-    tss_classified = {}
+    tss_classified = []
     gff_df['gene name'] = gff_df['attributes'].apply(extract_gene_name)
 
     if gff_df['gene name'].isnull().all():
         raise GffFormatException(
             "the attributes column of your GFF file does not contain gene names in the format 'Name=..")
 
-    gene_names = []
-
     gff_fw = gff_df[(gff_df['strand'] == "+")]
     gff_rv = gff_df[(gff_df['strand'] == "-")]
 
-    for tss in TSS_list:
+    distances = calculate_distances_to_next_gene(gff_df, tss_list, strand)
+
+    for tss, confidence, distance in zip(tss_list, confidence_list, distances):
 
         if not strand:
             intern = gff_fw[(gff_fw['end'] >= tss) & (gff_fw['start'] <= tss)]
@@ -65,6 +67,7 @@ def classify(gff_df, TSS_list, strand):
             anti = gff_fw[(gff_fw['end'] + 100 >= tss) & (gff_fw['start'] - 100 <= tss)]
 
         possible_class = []
+        gene_names = []
 
         if not intern.empty:
             possible_class.extend([TSSType.INTERNAL.value] * len(intern))
@@ -82,14 +85,49 @@ def classify(gff_df, TSS_list, strand):
             possible_class = [TSSType.ORPHAN.value]
             gene_names.append(None)
 
-        tss_classified[tss] = possible_class
+        tss_classified.extend([(tss, classification, confidence, gene_name, distance) for classification, gene_name in
+                               zip(possible_class, gene_names)])
 
-    data_tuples = [(k, tss_type) for k, v in tss_classified.items() for tss_type in v]
+    classified_df = pd.DataFrame(tss_classified, columns=['Pos', 'TSS type', 'confidence', 'gene name', 'distance'])
 
-    tss_classified = pd.DataFrame(data_tuples, columns=['Pos', 'TSS type'])
-    tss_classified['gene name'] = gene_names
+    return classified_df
 
-    return tss_classified
+
+def calculate_distances_to_next_gene(gff_df, positions, strand):
+    """
+    Calculates distances to the next gene in the specified direction for each position in the list.
+    :param gff_df: DataFrame containing GFF file information
+    :param positions: List of positions from which to calculate distances.
+    :param strand: Strand direction (True for reverse, False for forward).
+    :return: List of distances corresponding to each position. None is used for positions where no gene is found.
+    """
+    distances = []
+
+    for pos in positions:
+        if strand:
+            relevant_genes = gff_df[(gff_df['strand'] == '-') & (gff_df['start'] <= pos)]
+            if not relevant_genes.empty:
+                next_gene = relevant_genes.loc[relevant_genes['end'].idxmax()]
+                if next_gene['start'] <= pos <= next_gene['end']:
+                    distance = 0
+                else:
+                    distance = pos - next_gene['end']
+            else:
+                distance = None
+        else:
+            relevant_genes = gff_df[(gff_df['strand'] == '+') & (gff_df['end'] >= pos)]
+            if not relevant_genes.empty:
+                next_gene = relevant_genes.loc[relevant_genes['start'].idxmin()]
+                if next_gene['start'] <= pos <= next_gene['end']:
+                    distance = 0
+                else:
+                    distance = next_gene['start'] - pos
+            else:
+                distance = None
+
+        distances.append(distance)
+
+    return distances
 
 
 def find_common_tss(prediction, master_table, strand):
@@ -120,41 +158,6 @@ def find_common_tss(prediction, master_table, strand):
     return common_tss_df
 
 
-def to_csv(prediction, common_tss, master_table, tss_list, confidence_list, strand):
-    """
-     creates 3 different files:
-     - prediction.csv: Contains positions, types, confidence values, and gene names of our predicted TSS
-     - shared_TSS.csv: Contains positions, types, and gene names of TSS found by both our prediction and TSS Predator
-     - TSS_predator.csv: Contains positions and types of TSS found by TSS Predator
-     :param prediction:  DataFrame containing the TSS predicted by us
-     :param common_tss: DataFrame containing the TSS predicted by both us and TSS predator
-     :param master_table: DataFrame containing the master table data generated by TSS predator
-     :param tss_list: list of detected TSS
-     :param confidence_list: list that assigns a confidence value to each of the TSS in tss_list
-     :param strand: the strand on which the TSS were predicted(True for reverse and False for forward)
-     :return: None
-     """
-    df = pd.DataFrame({'Pos': tss_list, 'confidence': confidence_list})
-    prediction = pd.merge(df, prediction, on='Pos', how='inner')
-    columns_order = ['Pos', 'TSS type', 'confidence', 'gene name']
-    prediction = prediction[columns_order]
-
-    if not strand:
-        mt_relevant_columns = master_table[master_table['Strand'] == '+']
-
-    else:
-        mt_relevant_columns = master_table[master_table['Strand'] == '-']
-
-    mt_relevant_columns = mt_relevant_columns[['Pos', 'TSS type']]
-
-    dfs = [(prediction, 'prediction'), (common_tss, 'shared_TSS'), (mt_relevant_columns, 'TSS_predator')]
-
-    for df, name in dfs:
-        csv_file = f'{name}.csv'
-        with open(csv_file, 'w', newline='') as f:
-            df.to_csv(f, index=False)
-
-
 # fehler wenn df leer ist
 def calculate_frequency_of_tss_classes(common_tss_df):
     type_counts = common_tss_df['TSS type'].value_counts()
@@ -180,6 +183,8 @@ def freq_return_obj(common_tss_df, prediction_df, master_table_df):
     result_json = loads(dumps(result_dict))
     return result_json
 
+
+
 '''
 mt = {
     'Pos': [25675, 31366, 31650, 32000, 405, 400],
@@ -191,11 +196,12 @@ mt = {
 
 df = pd.DataFrame(mt)
 
-cl = classify("../tests/test_files/NC_004703.gff", [400, 25675, 31362, 31650], False)
+cl = classify("../tests/test_files/NC_004703.gff", [400, 25675, 31362, 31650], [0.9, 0.5, 0.7, 0.8], False)
 print(cl)
 co = find_common_tss(cl, df, False)
 print(co)
-to_csv(cl, co, df, [400, 25675, 31362, 31650], [0.9, 0.5, 0.7, 0.8], False)
+with open("csv_file", 'w', newline='') as f:
+    cl.to_csv(f, index=False)'''
 
 #print(freq_return_obj(cl, co, df))
-#print(recall_and_precision_return_obj(co, cl, df))'''
+#print(recall_and_precision_return_obj(co, cl, df))

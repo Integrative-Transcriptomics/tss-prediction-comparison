@@ -64,11 +64,11 @@ class JobObject:
 
         if(not (self.gff_path is None)):
             gff_df = ps.parse_gff_to_df(self.gff_path)
-            #ToDO include confidence values in df
-            self.classified_tss = cs.classify(gff_df, tss_list, self.is_reverse_strand)
+            self.classified_tss = cs.classify(gff_df, tss_list, confidence_list, self.is_reverse_strand)
             print(self.classified_tss)
         if(not (self.master_table_path is None)):
-            self.master_table = mtp.parse_master_table_to_df(self.master_table_path)
-            self.common_tss = cs.find_common_tss(self.classified_tss, self.master_table)
+            self.master_table = mtp.parse_master_table(self.master_table_path)
+            self.common_tss = cs.find_common_tss(self.classified_tss, list(self.master_table.items())[0][1], self.is_reverse_strand)
+            print(self.common_tss)
 
         self.status = JobStatus.FINISHED
