@@ -40,7 +40,7 @@ def classify(gff_df, tss_list, confidence_list, strand):
     :return: tss_classified: data frame that contains the position, classified type, confidence value,
     and corresponding gene name of the TSS
     """
-    gff_df = ps.parse_gff_to_df(gff_df)
+    #gff_df = ps.parse_gff_to_df(gff_df)
 
     tss_classified = []
     gff_df['gene name'] = gff_df['attributes'].apply(extract_gene_name)
@@ -58,12 +58,12 @@ def classify(gff_df, tss_list, confidence_list, strand):
 
         if not strand:
             intern = gff_fw[(gff_fw['end'] >= tss) & (gff_fw['start'] <= tss)]
-            prim = gff_fw[(gff_fw['start'] >= tss) & (gff_fw['start'] - 200 <= tss)]
+            prim = gff_fw[(gff_fw['start'] > tss) & (gff_fw['start'] - 200 <= tss)]
             anti = gff_rv[(gff_rv['end'] + 100 >= tss) & (gff_rv['start'] - 100 <= tss)]
 
         else:
             intern = gff_rv[(gff_rv['end'] >= tss) & (gff_rv['start'] <= tss)]
-            prim = gff_rv[(gff_rv['start'] >= tss) & (gff_rv['start'] - 200 <= tss)]
+            prim = gff_rv[(gff_rv['end'] < tss) & (gff_rv['end'] + 200 >= tss)]
             anti = gff_fw[(gff_fw['end'] + 100 >= tss) & (gff_fw['start'] - 100 <= tss)]
 
         possible_class = []
