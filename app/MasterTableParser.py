@@ -57,9 +57,7 @@ def __drop_rows_with_unwanted_conditions(condition, data_frame):
     :param data_frame:
     :return: DataFrame which holds only rows that represent the given condition
     """
-    for ind in data_frame.index:
-        if data_frame.at[ind, "Condition"] != condition:
-            data_frame = data_frame.drop([ind])
+    data_frame = data_frame[data_frame["Condition"] == condition]
     return data_frame
 
 
@@ -83,9 +81,7 @@ def __delete_not_detected_positions(data_frame):
     :param data_frame:
     :return:
     """
-    for ind in data_frame.index:
-        if data_frame.at[ind, "detected"] == 0:
-            data_frame = data_frame.drop([ind])
+    data_frame = data_frame[data_frame["detected"] == 1]
     return data_frame
 
 
@@ -93,7 +89,7 @@ def __summarize_TSS_TYPES(data_frame):
     """
     Iterates over every row of given DataFrame
     and adds a TSS-label (derived from binary TSS-classification) to row "TSS type".
-    The rows involved in the binary TSS-classification are dropped afterwards.
+    The rows involved in the binary TSS-classification are dropped afterward.
     :param data_frame:
     :return:
     """
