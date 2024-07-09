@@ -133,10 +133,10 @@ function JobManagement() {
     return jobIds && jobStatuses[jobIds.forward] === 'Finished' && jobStatuses[jobIds.reverse] === 'Finished';
   }
 
-  const handleViewCondition = (index) => {
-    // Navigate to the Condition page using the navigate function from the useNavigate hook.
-    navigate('/visualization', { state: { conditionIndex: index } });
-  }
+  const handleViewCondition = (conditionId) => {
+    // Navigate to the visualization page for the selected condition
+    navigate(`/visualization/${conditionId}`);
+  };
 
   // Render the list of projects, conditions, and job statuses
   return (
@@ -160,11 +160,11 @@ function JobManagement() {
                       </li>
                     </ul>
                     {/* Button to view condition, with numbering based on index */}
-                    <button className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
-                    onClick={() => handleViewCondition(index)}
-                    disabled={!isConditionFinished(conditionId)}
+                    <button  className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
+                      onClick={() => handleViewCondition(conditionId)}
+                      disabled={!isConditionFinished(conditionId)}
                     >
-                    View Condition {index + 1}
+                    View Condition
                     </button>
                   </li>
                 ))}

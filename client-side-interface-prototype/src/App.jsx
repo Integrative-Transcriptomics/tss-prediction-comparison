@@ -12,7 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ProjectForm />} />
           <Route path="/job-management" element={<JobManagement />} />
-          <Route path="/visualization" element={<Visualization />} />
+          <Route path="/visualization/:conditionId" element={<Visualization />} />
         </Routes>
       </div>
     </Router>
