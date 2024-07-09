@@ -138,11 +138,17 @@ function JobManagement() {
     navigate(`/visualization/${conditionId}`);
   };
 
+  // function for refreshing the jobmanagement page
+  function refreshPage() {
+    window.location.reload();
+  }
+
   // Render the list of projects, conditions, and job statuses
   return (
     <div className="App">
       <div className="projects-container">
         <h1>Project Manager</h1>
+        <button className="refresh-button" onClick={refreshPage}>Refresh Statuses</button>
         <ul>
           {projects.map(([projectId, projectName]) => (
             <div key={projectId} className="project-box">
