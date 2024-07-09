@@ -13,13 +13,13 @@ class MyTestCase(unittest.TestCase):
         self.df_infected_test1 = pd.DataFrame({
             "Pos": [1],
             "Strand": ["+"],
-            "TSS type": ["Orphan"]
+            "TSS type": ["orphan"]
         })
 
         self.df_uninfected_test1 = pd.DataFrame({
             "Pos": [2],
             "Strand": ["+"],
-            "TSS type": ["Secondary"]
+            "TSS type": ["pTSS/sTSS"]
         })
 
         self.dict_test1 = {"infected": self.df_infected_test1,
@@ -30,13 +30,13 @@ class MyTestCase(unittest.TestCase):
         self.df_infected_test2 = pd.DataFrame({
             "Pos": [442, 507],
             "Strand": ["+", "-"],
-            "TSS type": ["Primary", "Antisense"]
+            "TSS type": ["pTSS/sTSS", "asTSS"]
         })
 
         self.df_uninfected_test2 = pd.DataFrame({
             "Pos": [507],
             "Strand": ["-"],
-            "TSS type": ["Antisense"]
+            "TSS type": ["asTSS"]
         })
 
         self.dict_test2 = {"infected": self.df_infected_test2,
