@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import './JobManagement.css';
+import { useNavigate } from 'react-router-dom';
 
 function JobManagement() {
 
@@ -12,6 +13,8 @@ function JobManagement() {
   const [conditionsJobs, setConditionsJobs] = useState({});
   // State to store the status of each job.
   const [jobStatuses, setJobStatuses] = useState({});
+  // Use the useNavigate hook to navigate to a different page.
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch all projects that are currently in the database
@@ -125,6 +128,16 @@ function JobManagement() {
     }
   };
 
+  const isConditionFinished = (conditionId) => {
+    const jobIds = conditionsJobs[conditionId];
+    return jobIds && jobStatuses[jobIds.forward] === 'Finished' && jobStatuses[jobIds.reverse] === 'Finished';
+  }
+
+  const handleViewCondition = (index) => {
+    // Navigate to the Condition page using the navigate function from the useNavigate hook.
+    navigate('/visualization', { state: { conditionIndex: index } });
+  }
+
   // Render the list of projects, conditions, and job statuses
   return (
     <div className="App">
@@ -135,7 +148,7 @@ function JobManagement() {
             <div key={projectId} className="project-box">
               <h2>{projectName}</h2>
               <ul>
-                {projectConditions[projectId]?.map(([conditionName, conditionId]) => (
+                {projectConditions[projectId]?.map(([conditionName, conditionId] , index) => (
                   <li key={conditionId} className="condition-box">
                     <h3>{conditionName}</h3>
                     <ul>
@@ -146,6 +159,13 @@ function JobManagement() {
                         Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
                       </li>
                     </ul>
+                    {/* Button to view condition, with numbering based on index */}
+                    <button className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
+                    onClick={() => handleViewCondition(index)}
+                    disabled={!isConditionFinished(conditionId)}
+                    >
+                    View Condition {index + 1}
+                    </button>
                   </li>
                 ))}
               </ul>

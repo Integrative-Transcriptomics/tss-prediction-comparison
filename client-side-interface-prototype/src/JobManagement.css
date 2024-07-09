@@ -34,4 +34,25 @@
   .status-failed {
     color: red;
   }
+
+  .view-condition-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .view-condition-button.finished {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .view-condition-button.unfinished {
+    background-color: #f44336;
+    color: white;
+    cursor: not-allowed;
+  }
+
+
   
