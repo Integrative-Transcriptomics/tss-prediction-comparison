@@ -139,3 +139,10 @@ button:hover {
   padding: 7px;
   color: #007bff;
 }
+
+.error-message {
+  min-height: 24px;
+  margin-bottom: 16;
+  padding: 7px;
+  color: red;
+}

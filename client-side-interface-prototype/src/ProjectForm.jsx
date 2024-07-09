@@ -24,6 +24,9 @@ function ProjectForm() {
   // State to manage the feedback message displayed after submitting.
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
+  // State to manage the error message displayed if no project name was given
+  const [errorMessage, setErrorMessage] = useState('');
+
   // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
   const addCondition = () => {
     setConditions([...conditions, { id: conditions.length + 1, ref: React.createRef() }]);
@@ -47,6 +50,15 @@ function ProjectForm() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevents the default form submission behavior.
 
+    // clear previous error messages
+    setErrorMessage('');
+
+    // Error message if project name is empty
+    if (!projectName.trim()) {
+      setErrorMessage('Project Name cannot be empty.');
+      return
+    }
+
     // Set the feedback message
     setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
 
@@ -54,7 +66,9 @@ function ProjectForm() {
     const formData = new FormData();
 
     // Append the name of the project to the FormData object if it exists.
-    if (projectName) {
+    if (!projectName.trim()) {
+      console.error('Project Name cannot be empty.');
+    } else {
       formData.append('projectName', projectName);
     }
 
@@ -101,8 +115,7 @@ function ProjectForm() {
 
   const handleLoadJobManagement = () => {
     // Navigate to the Job Management page using the navigate function from the useNavigate hook.
-    // in order to pass the project name to the next page (job queue page) we need to modify the navigation call
-    navigate('/job-management', { state: { projectName: projectName } });
+    navigate('/job-management');
   };
 
   return (
@@ -153,6 +166,8 @@ function ProjectForm() {
     </div>
     {/* Feedback Message */}
     {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>}
+    {/* Error message: Project Name cannot be empty*/}
+    {errorMessage && <div className="error-message">{errorMessage} </div>}
   </div>
   );
 }
