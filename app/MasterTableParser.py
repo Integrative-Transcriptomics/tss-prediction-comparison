@@ -6,11 +6,11 @@ class TSS_TYPES(Enum):
     """
     Enum class representing TSS_Types.
     """
-    Primary = 1
-    Secondary = 2
-    Internal = 3
-    Antisense = 4
-    Orphan = 5
+    Primary = "pTSS/sTSS"
+    Secondary = "pTSS/sTSS"
+    Internal = "iTSS"
+    Antisense = "asTSS"
+    Orphan = "orphan"
 
 
 WANTED_COLUMNS = ["Condition", "detected", "Pos", "Strand", "Primary", "Secondary", "Internal", "Antisense", "Locus_tag"]
@@ -57,7 +57,7 @@ def __drop_rows_with_unwanted_conditions(condition, data_frame):
     :param data_frame:
     :return: DataFrame which holds only rows that represent the given condition
     """
-    data_frame = data_frame[data_frame["Condition"] == condition]
+    data_frame = data_frame[data_frame["Condition"] == condition].copy()
     return data_frame
 
 
@@ -95,12 +95,12 @@ def __summarize_TSS_TYPES(data_frame):
     """
     tss_type_of_positions = []
     for ind in data_frame.index:
-        for type in TSS_TYPES:
-            if data_frame.at[ind, "Locus_tag"] == type.name.lower():
-                tss_type_of_positions.append(type.name)
+        for name, member in TSS_TYPES.__members__.items():
+            if data_frame.at[ind, "Locus_tag"] == name.lower():
+                tss_type_of_positions.append(member.value)
                 break
-            elif data_frame.at[ind, type.name] == 1:
-                tss_type_of_positions.append(type.name)
+            elif data_frame.at[ind, name] == 1:
+                tss_type_of_positions.append(member.value)
                 break
     data_frame["TSS type"] = tss_type_of_positions
     return __delete_unwanted_columns(data_frame, ["Pos", "Strand", "TSS type"])
@@ -121,11 +121,11 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
             data_frame = data_frame.drop(columns=[col])
     return data_frame
 
-
+'''
 # example output for testfile:
-#file_path = "../tests/test_files/TestFile2MasterTable.tsv"
-#dfs = parse_master_table(file_path)
-#for condition in dfs.keys():
-    #print("condition: " + condition + "\n")
-    #print(dfs.get(condition))
-    #print("\n")
+file_path = "../tests/test_files/MasterTable.tsv"
+dfs = parse_master_table(file_path)
+for condition in dfs.keys():
+    print("condition: " + condition + "\n")
+    print(dfs.get(condition))
+    print("\n")'''
