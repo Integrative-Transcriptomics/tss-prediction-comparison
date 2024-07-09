@@ -126,3 +126,16 @@ button:hover {
 .load-job-button:hover {
   background-color: #0056b3;
 }
+
+.buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback-message {
+  min-height: 24px;
+  margin-bottom: 16;
+  padding: 7px;
+  color: #007bff;
+}

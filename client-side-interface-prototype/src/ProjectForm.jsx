@@ -21,6 +21,9 @@ function ProjectForm() {
   // Use the useNavigate hook to navigate to a different page.
   const navigate = useNavigate();
 
+  // State to manage the feedback message displayed after submitting.
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+
   // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
   const addCondition = () => {
     setConditions([...conditions, { id: conditions.length + 1, ref: React.createRef() }]);
@@ -43,6 +46,9 @@ function ProjectForm() {
   // Function to handle form submission and upload files to the server.
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevents the default form submission behavior.
+
+    // Set the feedback message
+    setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
 
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
@@ -138,11 +144,16 @@ function ProjectForm() {
         <GFF ref={gffRef} />
       </div>
       
+      {/* Buttons Container */}
+      <div className='buttons-container'> 
       {/* Submit Button */}
       <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
       {/* Job Management Page Button */}
       <button className="load-job-button" onClick={handleLoadJobManagement}>Load Project-Manager</button>
     </div>
+    {/* Feedback Message */}
+    {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>}
+  </div>
   );
 }
 
