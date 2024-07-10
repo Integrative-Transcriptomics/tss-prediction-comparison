@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import * as echarts from 'echarts';
 
 function Visualization() {
   // Get the condition from the URL parameters
   const { conditionId } = useParams();
+  const [jobIds, setJobIds] = useState(null);
   const [forwardCsvData, setForwardCsvData] = useState(null);
   const [reverseCsvData, setReverseCsvData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +45,91 @@ function Visualization() {
     fetchJobIds();
   }, [conditionId]);
 
+  useEffect(() => {
+    if (forwardCsvData && reverseCsvData) {
+      const chartDom = document.getElementById('echarts');
+      const myChart = echarts.init(chartDom);
+
+      const parseCsv = (csvText) => {
+        const lines = csvText.split('\n').filter(line => line.trim() !== ''); // Filter out empty lines
+        const headers = lines[0].split(',');
+        return lines.slice(1).map(line => {
+          const values = line.split(',');
+          return headers.reduce((obj, header, index) => {
+            obj[header] = values[index];
+            return obj;
+          }, {});
+        });
+      };
+
+      const forwardParsedData = forwardCsvData ? parseCsv(forwardCsvData) : [];
+      const reverseParsedData = reverseCsvData ? parseCsv(reverseCsvData) : [];
+
+      const processData = (parsedData) => {
+        const fileData = {};
+        parsedData.forEach(row => {
+          const fileName = row['gene name'];
+          const tssType = row['TSS type'];
+          if (!fileData[fileName]) {
+            fileData[fileName] = {};
+          }
+          if (!fileData[fileName][tssType]) {
+            fileData[fileName][tssType] = 0;
+          }
+          fileData[fileName][tssType] += 1;
+        });
+        return fileData;
+      };
+
+      const forwardData = processData(forwardParsedData);
+      const reverseData = processData(reverseParsedData);
+
+      const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)]));
+      const tssTypes = Array.from(new Set([...forwardParsedData.map(row => row['TSS type']), ...reverseParsedData.map(row => row['TSS type'])]));
+
+      const seriesData = tssTypes.map(tssType => {
+        return {
+          name: tssType,
+          type: 'bar',
+          stack: 'total',
+          label: {
+            show: true
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          data: fileNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
+        };
+      });
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        legend: {},
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value'
+        },
+        yAxis: {
+          type: 'category',
+          data: fileNames
+        },
+        series: seriesData
+      };
+
+      myChart.setOption(option);
+    }
+  }, [forwardCsvData, reverseCsvData]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -51,82 +138,11 @@ function Visualization() {
     return <div>Error: {error}</div>;
   }
 
-  if (!forwardCsvData && !reverseCsvData) {
-    return <div>No data available</div>;
-  }
-
-  // Function to parse CSV data into an array of objects
-  const parseCsv = (csvText) => {
-    const lines = csvText.split('\n').filter(line => line.trim() !== ''); // Filter out empty lines
-    const headers = lines[0].split(',');
-    return lines.slice(1).map(line => {
-      const values = line.split(',');
-      return headers.reduce((obj, header, index) => {
-        obj[header] = values[index];
-        return obj;
-      }, {});
-    });
-  };
-
-  const forwardParsedData = forwardCsvData ? parseCsv(forwardCsvData) : [];
-  const reverseParsedData = reverseCsvData ? parseCsv(reverseCsvData) : [];
-
   return (
     <div>
       <h1>Visualization Page</h1>
       <p>This is the visualization content for Condition ID: {conditionId}</p>
-      
-      {forwardParsedData.length > 0 ? (
-        <div>
-          <h2>Forward Job Data</h2>
-          <table>
-            <thead>
-              <tr>
-                {Object.keys(forwardParsedData[0]).map((header, index) => (
-                  <th key={index}>{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {forwardParsedData.map((row, index) => (
-                <tr key={index}>
-                  {Object.values(row).map((value, i) => (
-                    <td key={i}>{value}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p>No forward data available</p>
-      )}
-      
-      {reverseParsedData.length > 0 ? (
-        <div>
-          <h2>Reverse Job Data</h2>
-          <table>
-            <thead>
-              <tr>
-                {Object.keys(reverseParsedData[0]).map((header, index) => (
-                  <th key={index}>{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {reverseParsedData.map((row, index) => (
-                <tr key={index}>
-                  {Object.values(row).map((value, i) => (
-                    <td key={i}>{value}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p>No reverse data available</p>
-      )}
+      <div id="echarts" style={{ width: '100%', height: '600px' }}></div>
     </div>
   );
 }
