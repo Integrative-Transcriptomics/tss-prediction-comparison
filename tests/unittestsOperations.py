@@ -100,8 +100,28 @@ class MyTestCase(unittest.TestCase):
             "value": [520.0, 536.0, 553.0, 557.0, 568.0, 600]
         })
 
+        df4 = pd.DataFrame({
+            "region": ["MT"] * 4,
+            "position": [3, 4, 5, 6],
+            "value": [553.0, 557.0, 568.0, 600]
+        })
+
+        df5 = pd.DataFrame({
+            "region": ["MT"] * 4,
+            "position": [5, 6, 7, 8],
+            "value": [520.0, 536.0, 553.0, 557.0]
+        })
+
+        expected_result_for_df4_and_df5 = pd.DataFrame({
+            "region": ["MT"] * 8,
+            "position": [1, 2, 3, 4, 5, 6, 7, 8],
+            "value": [0, 0, 276.5, 278.5, 544, 568, 276.5, 278.5]
+        })
+
         result = ops.median_of_multiple_df([self.df, self.df2, self.df3])
+        result2 = ops.median_of_multiple_df([df4, df5])
         pd.testing.assert_frame_equal(result, expected_result)
+        pd.testing.assert_frame_equal(result2, expected_result_for_df4_and_df5)
 
     def test_get_max_values_of_multiple_df(self):
         expected_result = pd.DataFrame({

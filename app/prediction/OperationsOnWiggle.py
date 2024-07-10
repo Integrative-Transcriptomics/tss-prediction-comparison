@@ -187,7 +187,8 @@ def __apply_operation_to_multiple_df(lst_of_df, operation):
     :param operation: operation which will be applied
     :return: new_df
     """
-    max_length = max(len(df) for df in lst_of_df)
+    last_positions = [df['position'].iloc[-1] for df in lst_of_df]
+    max_length = max(last_positions)
     full_positions = range(1, max_length + 1)
 
     for i in range(len(lst_of_df)):
