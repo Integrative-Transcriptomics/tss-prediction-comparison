@@ -194,13 +194,14 @@ def __apply_operation_to_multiple_df(lst_of_df, operation):
     for i in range(len(lst_of_df)):
         lst_of_df[i] = fill_dataframe(lst_of_df[i], full_positions)
 
-    new_df = lst_of_df[0]
-    for row in range(len(new_df["value"])):
-        values_of_dfs = []
-        for df in lst_of_df:
-            values_of_dfs.append(df.at[row, "value"])
-        new_df.at[row, "value"] = operation(values_of_dfs)
-    return new_df
+    combined_df = pd.concat(lst_of_df, ignore_index=True)
+
+    result_df = combined_df.groupby('position')['value'].agg(operation).reset_index()
+
+    result_df['region'] = lst_of_df[0]['region'].iloc[0]
+    result_df = result_df[['region', 'position', 'value']]
+
+    return result_df
 
 
 def median_of_multiple_df(lst_of_df):
@@ -210,7 +211,7 @@ def median_of_multiple_df(lst_of_df):
     :param lst_of_df: holds DataFrames
     :return: new_df with median as values
     """
-    return __apply_operation_to_multiple_df(lst_of_df, np.median)
+    return __apply_operation_to_multiple_df(lst_of_df, 'median')
 
 
 def add_values_of_multiple_df(lst_of_df):
@@ -220,7 +221,7 @@ def add_values_of_multiple_df(lst_of_df):
     :param lst_of_df: holds DataFrames
     :return: new_df with sum as values
     """
-    return __apply_operation_to_multiple_df(lst_of_df, sum)
+    return __apply_operation_to_multiple_df(lst_of_df, "sum")
 
 
 def get_max_values_of_multiple_df(lst_of_df):
@@ -230,7 +231,7 @@ def get_max_values_of_multiple_df(lst_of_df):
     :param lst_of_df: holds DataFrames
     :return: new_df with max as values
     """
-    return __apply_operation_to_multiple_df(lst_of_df, max)
+    return __apply_operation_to_multiple_df(lst_of_df, 'max')
 
 
 def get_min_values_of_multiple_df(lst_of_df):
@@ -240,7 +241,7 @@ def get_min_values_of_multiple_df(lst_of_df):
     :param lst_of_df: holds DataFrames
     :return: new_df with min as values
     """
-    return __apply_operation_to_multiple_df(lst_of_df, min)
+    return __apply_operation_to_multiple_df(lst_of_df, 'min')
 
 def mean_absolute_deviation(data_frame):
     """
