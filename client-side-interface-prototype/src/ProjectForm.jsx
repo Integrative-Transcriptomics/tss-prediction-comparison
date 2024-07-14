@@ -9,8 +9,8 @@ function ProjectForm() {
   // State for managing the project name input.
   const [projectName, setProjectName] = useState('');
   
-  // State for managing the list of conditions. Each condition has a unique id and a reference for handling file uploads.
-  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef() }]);
+  // State for managing the list of conditions. Each condition has a name, a unique id and a reference for handling file uploads.
+  const [conditions, setConditions] = useState([{ name: 'Condition 1', id: 1, ref: React.createRef() }]);
   
   // Reference for the GFF component to access its file state.
   const gffRef = useRef(null);
@@ -27,9 +27,11 @@ function ProjectForm() {
   // State to manage the error message displayed if no project name was given
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
+  // Function to add a new condition to the list. It creates a new condition with a name, a unique id and a reference.
   const addCondition = () => {
-    setConditions([...conditions, { id: conditions.length + 1, ref: React.createRef() }]);
+    const index = conditions.length + 1;
+    // back-ticks not single quotes for variables inside strings
+    setConditions([...conditions, { name: `Condition ${index}`, id: index, ref: React.createRef() }]);
   };
 
   // Function to remove the last condition from the list. Ensures there is at least one condition left.
@@ -58,6 +60,8 @@ function ProjectForm() {
       setErrorMessage('Project Name cannot be empty.');
       return
     }
+
+    // Error message if 
 
     // Set the feedback message
     setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
