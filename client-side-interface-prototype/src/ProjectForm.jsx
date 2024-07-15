@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutlet } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -34,6 +34,21 @@ function ProjectForm() {
     setConditions([...conditions, { id: index, ref: React.createRef(), name: `Condition ${index}` }]);
   };
 
+  // Function for updating the condition name given the chosen conditions id and the new chosen name
+  const updateConditionName = (id, newName) => {
+    // declare new conditions array so that the state isnt directly mutated and map over the current conditions
+    const updatedConditions = conditions.map(
+      condition => {
+        if(id === condition.id) {
+          // update the name of the current condition 
+          return {...condition, name: newName};
+        }
+        // dont change the unaffected conditions
+        return condition;
+      }
+    )
+    setConditions(updatedConditions);
+  }
   // Function to remove the last condition from the list. Ensures there is at least one condition left.
   const deleteCondition = () => {
     if (conditions.length > 1) {
@@ -140,11 +155,21 @@ function ProjectForm() {
       <div className="form-group">
         <label>Data Upload:</label>
         
-        {/* Render each Condition component in the conditions array */}
-        {conditions.map((condition) => (
-          <Condition key={condition.id} id={condition.id} ref={condition.ref} name ={condition.name}/>
-        ))}
-        
+        {/* Render each Condition component and its corresponding input field */}
+        {conditions.map(
+          (condition) =>
+            <div className="condition-input-group" key = {condition.id}>
+              <Condition key={condition.id} id={condition.id} ref={condition.ref} name ={condition.name}/>
+              <input 
+                type = "text"  
+                onChange={(e) => updateConditionName(condition.id, e.target.value)}
+                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the Mastertable if given one)`} 
+              >
+              </input>
+            </div>
+          )
+        }
+
         {/* Buttons to add or remove conditions */}
         <button className="button" onClick={addCondition}>+</button>
         <button className="button" onClick={deleteCondition}>-</button>
