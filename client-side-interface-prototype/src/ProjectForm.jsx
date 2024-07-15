@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutlet } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -9,8 +9,8 @@ function ProjectForm() {
   // State for managing the project name input.
   const [projectName, setProjectName] = useState('');
   
-  // State for managing the list of conditions. Each condition has a unique id and a reference for handling file uploads.
-  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef() }]);
+  // State for managing the list of conditions. Each condition has a name, a unique id and a reference for handling file uploads.
+  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef(), name: 'Condition 1' }]);
   
   // Reference for the GFF component to access its file state.
   const gffRef = useRef(null);
@@ -27,11 +27,28 @@ function ProjectForm() {
   // State to manage the error message displayed if no project name was given
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Function to add a new condition to the list. It creates a new condition with a unique id and a reference.
+  // Function to add a new condition to the list. It creates a new condition with a name, a unique id and a reference.
   const addCondition = () => {
-    setConditions([...conditions, { id: conditions.length + 1, ref: React.createRef() }]);
+    const index = conditions.length + 1;
+    // back-ticks not single quotes for variables inside strings
+    setConditions([...conditions, { id: index, ref: React.createRef(), name: `Condition ${index}` }]);
   };
 
+  // Function for updating the condition name given the chosen conditions id and the new chosen name
+  const updateConditionName = (id, newName) => {
+    // declare new conditions array so that the state isnt directly mutated and map over the current conditions
+    const updatedConditions = conditions.map(
+      condition => {
+        if(id === condition.id) {
+          // update the name of the current condition 
+          return {...condition, name: newName};
+        }
+        // dont change the unaffected conditions
+        return condition;
+      }
+    )
+    setConditions(updatedConditions);
+  }
   // Function to remove the last condition from the list. Ensures there is at least one condition left.
   const deleteCondition = () => {
     if (conditions.length > 1) {
@@ -58,6 +75,7 @@ function ProjectForm() {
       setErrorMessage('Project Name cannot be empty.');
       return
     }
+
 
     // Set the feedback message
     setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
@@ -88,9 +106,12 @@ function ProjectForm() {
       if (conditionRef) {
         conditionRef.forwardFiles.forEach((file, idx) => {
           formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_forward_${idx + 1}_name`, condition.name);
         });
         conditionRef.reverseFiles.forEach((file, idx) => {
           formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_reverse_${idx + 1}_name`, condition.name);
+
         });
       }
     });
@@ -137,11 +158,21 @@ function ProjectForm() {
       <div className="form-group">
         <label>Data Upload:</label>
         
-        {/* Render each Condition component in the conditions array */}
-        {conditions.map((condition) => (
-          <Condition key={condition.id} id={condition.id} ref={condition.ref} />
-        ))}
-        
+        {/* Render each Condition component and its corresponding input field */}
+        {conditions.map(
+          (condition) =>
+            <div className="condition-input-group" key = {condition.id}>
+              <Condition key={condition.id} id={condition.id} ref={condition.ref} name ={condition.name}/>
+              <input 
+                type = "text"  
+                onChange={(e) => updateConditionName(condition.id, e.target.value)}
+                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the Mastertable if given one)`} 
+              >
+              </input>
+            </div>
+          )
+        }
+
         {/* Buttons to add or remove conditions */}
         <button className="button" onClick={addCondition}>+</button>
         <button className="button" onClick={deleteCondition}>-</button>
