@@ -10,7 +10,7 @@ function ProjectForm() {
   const [projectName, setProjectName] = useState('');
   
   // State for managing the list of conditions. Each condition has a name, a unique id and a reference for handling file uploads.
-  const [conditions, setConditions] = useState([{ name: 'Condition 1', id: 1, ref: React.createRef() }]);
+  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef(), name: 'Condition 1' }]);
   
   // Reference for the GFF component to access its file state.
   const gffRef = useRef(null);
@@ -31,7 +31,7 @@ function ProjectForm() {
   const addCondition = () => {
     const index = conditions.length + 1;
     // back-ticks not single quotes for variables inside strings
-    setConditions([...conditions, { name: `Condition ${index}`, id: index, ref: React.createRef() }]);
+    setConditions([...conditions, { id: index, ref: React.createRef(), name: `Condition ${index}` }]);
   };
 
   // Function to remove the last condition from the list. Ensures there is at least one condition left.
@@ -61,7 +61,6 @@ function ProjectForm() {
       return
     }
 
-    // Error message if 
 
     // Set the feedback message
     setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
@@ -91,10 +90,10 @@ function ProjectForm() {
       const conditionRef = condition.ref.current;
       if (conditionRef) {
         conditionRef.forwardFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name, condition.name);
         });
         conditionRef.reverseFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name, condition.name);
         });
       }
     });
@@ -143,7 +142,7 @@ function ProjectForm() {
         
         {/* Render each Condition component in the conditions array */}
         {conditions.map((condition) => (
-          <Condition key={condition.id} id={condition.id} ref={condition.ref} />
+          <Condition key={condition.id} id={condition.id} ref={condition.ref} name ={condition.name}/>
         ))}
         
         {/* Buttons to add or remove conditions */}
