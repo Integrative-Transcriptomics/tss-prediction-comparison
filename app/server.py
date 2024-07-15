@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, request, jsonify, send_from_directory, Response, send_file
 from app.api.allowedFileTypes import FileEndings
 from app.job.jobProcessor import job_processor
 from app.job.JobObject import JobObject
@@ -12,6 +12,9 @@ from json import loads, dumps
 import threading
 import queue
 import io
+import zipfile
+from io import BytesIO
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 dirname = os.path.dirname(__file__)
@@ -64,14 +67,20 @@ def get_condition_by_id(id_):
 
 # turn dataframe into csv object for response endpoints
 def df_to_response(df, filename):
-    buffer = io.StringIO()
-    df.to_csv(buffer, index=False)
-    buffer.seek(0) #reset buffer
+
+    buffer = df_to_csv_bytes(df)
 
     response = Response(buffer, mimetype='text/csv')
     response.headers["Content-Disposition"] = "attachment; filename=" + filename
 
     return response
+
+# turn df into bytes object
+def df_to_csv_bytes(df):
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)  # reset buffer
+    return buffer
 
 # Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
 # upon sucess
@@ -185,29 +194,82 @@ def upload_file():
         return response_object, status_code
 
 
-# get file by id endpoint. Returns the wiggle file if a job with given id exists
-@app.route("/api/get_file", methods=["GET"])
-def get_wiggle_by_id():
+# get files by project id. Returns a zipped file of processed wiggle files, predictions, common tss, the gff file and
+# the master table (if uploaded)
+@app.route("/api/get_zip_file", methods=["GET"])
+def get_files_by_id():
     if request.method == 'GET':
-        id = request.args.get('jobid', type=str)
-        job = get_job_by_id(id)
-        if job:
-            try:
-                mean_df = job.get_processed_df()
-            except NotReadyException as e:
-                status_code = 400
-                response_object = jsonify({"Error": e.message})
-                return response_object, status_code
+        id = request.args.get('project_id', type=str)
+        project = get_project_by_id(id)
+        if project:
 
-            return_df = mean_df.to_json()
-            parsed_json = loads(return_df)
+            project_name = project.project_name
 
-            status_code = 200
+            # Create a BytesIO object to hold the zip file in memory
+            memory_file = BytesIO()
 
-            return parsed_json, status_code
+            conditions = project.get_conditions()
+            with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for condition_key in conditions:
+                    condition = conditions[condition_key]
+                    condition_id = condition.name
+                    forward_id, reverse_id = condition.get_jobids()
+
+                    forward_object = get_job_by_id(forward_id)
+                    reverse_object = get_job_by_id(reverse_id)
+
+                    file_path_forward = os.path.join(condition_id, "forward.wig")
+                    file_path_reverse = os.path.join(condition_id, "reverse.wig")
+
+                    try:
+                        zipf.writestr(file_path_forward, df_to_csv_bytes(forward_object.get_processed_df()).getvalue())
+                        zipf.writestr(file_path_reverse, df_to_csv_bytes(reverse_object.get_processed_df()).getvalue())
+
+                        tss_df_forward = forward_object.get_file(returnType.TSS)
+                        tss_df_reverse = reverse_object.get_file(returnType.TSS)
+
+                        file_path_forward_TSS = os.path.join(condition_id, "predicted_forward_tss.csv")
+                        file_path_reverse_TSS = os.path.join(condition_id, "predicted_reverse_tss.csv")
+
+                        zipf.writestr(file_path_forward_TSS, df_to_csv_bytes(tss_df_forward).getvalue())
+                        zipf.writestr(file_path_reverse_TSS, df_to_csv_bytes(tss_df_reverse).getvalue())
+
+                    except NotReadyException as e:
+                        status_code = 400
+                        response_object = jsonify({"Error": e.message})
+                        return response_object, status_code
+                    try:
+                        file_path_forward_common = os.path.join(condition_id, "predicted_forward_common_tss.csv")
+                        file_path_reverse_common = os.path.join(condition_id, "predicted_reverse_common_tss.csv")
+
+                        common_df_forward = forward_object.get_file(returnType.COMMON)
+                        common_df_reverse = reverse_object.get_file(returnType.COMMON)
+
+                        zipf.writestr(file_path_forward_common, df_to_csv_bytes(common_df_forward).getvalue())
+                        zipf.writestr(file_path_reverse_common, df_to_csv_bytes(common_df_reverse).getvalue())
+
+                    except Exception as e:
+                        status_code = 400
+                        response_object = jsonify({"Error": e.message})
+                        return response_object, status_code
+
+                    try:
+                        master_dict = forward_object.get_file(returnType.MASTERTABLE)
+
+                        for condition in master_dict.keys():
+                            file_path = os.path.join(condition, "master_table.csv")
+                            zipf.writestr(file_path, df_to_csv_bytes(master_dict[condition]).getvalue())
+
+                    except Exception as e:
+                        status_code = 400
+                        response_object = jsonify({"Error": e.message})
+                        return response_object, status_code
+
+            memory_file.seek(0)
+            return send_file(memory_file, as_attachment=True, download_name=project_name+".zip")
         else:
             status_code = 404
-            response_object = jsonify({"Error": "No file found with id: " + id})
+            response_object = jsonify({"Error": "No project found with id: " + id})
             return response_object, status_code
 
 
