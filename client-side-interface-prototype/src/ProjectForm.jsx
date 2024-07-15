@@ -105,10 +105,13 @@ function ProjectForm() {
       const conditionRef = condition.ref.current;
       if (conditionRef) {
         conditionRef.forwardFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name, condition.name);
+          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_forward_${idx + 1}_name`, condition.name);
         });
         conditionRef.reverseFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name, condition.name);
+          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
+          formData.append(`condition_${index + 1}_reverse_${idx + 1}_name`, condition.name);
+
         });
       }
     });
