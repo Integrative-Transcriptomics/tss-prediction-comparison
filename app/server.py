@@ -84,6 +84,8 @@ def upload_file():
         conditions_forward = {}
         conditions_reverse = {}
 
+        condition_names = {}
+
         gff_path = None
         master_table_path = None
 
@@ -92,6 +94,12 @@ def upload_file():
         project_name_form = request.form.get("projectName")
         if(project_name_form):
             project_name = project_name_form
+
+        for key in request.form.keys():
+            if key.startswith("condition_"):
+                condition = key.split("condition_")[1].split("_")[0]
+                if(condition not in condition_names.keys()):
+                    condition_names[condition] = request.form.get(key)
 
         for key in request.files:
             print(key)
@@ -146,8 +154,9 @@ def upload_file():
             job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
             jobRegistry[job.id] = job
             jobQueue.put(job)
-            condition_json["Condition " + condition] = {"forward": job.id}
-            condition_json["Condition " + condition]["uuid"] = str(uuid.uuid4())
+            cond_name = condition_names[condition]
+            condition_json[cond_name] = {"forward": job.id}
+            condition_json[cond_name]["uuid"] = str(uuid.uuid4())
         for condition in conditions_reverse:
             paths = []
             for key in conditions_reverse[condition]:
@@ -162,10 +171,11 @@ def upload_file():
             job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=True)
             jobRegistry[job.id] = job
             jobQueue.put(job)
-            condition_json["Condition " + condition]["reverse"] = job.id
+            cond_name = condition_names[condition]
+            condition_json[cond_name]["reverse"] = job.id
 
-            condition_object = ConditionObject(name = "Condition " + condition, forward_id=condition_json["Condition " + condition]["forward"],
-                                               backward_id=condition_json["Condition " + condition]["reverse"])
+            condition_object = ConditionObject(name = cond_name, forward_id=condition_json[cond_name]["forward"],
+                                               backward_id=condition_json[cond_name]["reverse"])
 
             conditionRegistry[condition_object.id] = condition_object
 
