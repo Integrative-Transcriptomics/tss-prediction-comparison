@@ -23,7 +23,14 @@ class ConditionNotFoundException(Exception):
 
 
 class JobObject:
-    def __init__(self, filepaths, name, master_table_path = None, gff_path = None, is_reverse_strand = False ):
+    def __init__(self,
+                 filepaths,
+                 name,
+                 condition_name,
+                 master_table_path = None,
+                 gff_path = None,
+                 is_reverse_strand = False):
+
         self.name = name
         self.id = str(uuid.uuid4())
         self.processedDF = None
@@ -35,8 +42,7 @@ class JobObject:
         self.classified_tss = None
         self.common_tss = None
         self.master_table = None
-        self.conditionObject = None
-
+        self.condition_name = condition_name # upload_file in server.py needs to be adjusted
 
     def get_file(self, type):
         if self.status == JobStatus.FINISHED:
