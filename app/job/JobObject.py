@@ -114,6 +114,6 @@ class JobObject:
             master_table = conditions_of_master_table[self.condition_name]
         except KeyError as e:
             raise ConditionNotFoundException(
-                "condition_name of JobObject does not exist in provided MasterTable")
+                "condition_name of JobObject: " + self.condition_name + " does not exist in provided MasterTable")
         else:
             return master_table
