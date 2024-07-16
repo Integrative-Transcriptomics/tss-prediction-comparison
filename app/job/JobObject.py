@@ -16,7 +16,7 @@ class returnType(Enum):
 
 
 class ConditionNotFoundException(Exception):
-    """Custom exception in case name of ConditionObject of JobObject is not found in MasterTable of JobObject."""
+    """Custom exception in case self.condition_name of JobObject is not found in MasterTable of JobObject."""
     def __init__(self, message):
         super().__init__(message)
         self.message = message
@@ -101,10 +101,8 @@ class JobObject:
             except ConditionNotFoundException as e:
                 print(e.message)
             else:
-                #TODO: here we need to pass correct mastertable
-                common_tss = cs.find_common_tss(self.classified_tss, list(self.master_table.items())[0][1],
-                                                     self.is_reverse_strand)
-                print(common_tss)
+                common_tss = cs.find_common_tss(self.classified_tss, self.master_table, self.is_reverse_strand)
+                print("common TSS for: " + self.condition_name + "\n" + common_tss)
                 return common_tss
 
     def __get_table_for_condition(self, conditions_of_master_table):
@@ -113,9 +111,9 @@ class JobObject:
         :return: the corresponding MasterTable to this
         """
         try:
-            master_table = conditions_of_master_table[self.conditionObject.name]
+            master_table = conditions_of_master_table[self.condition_name]
         except KeyError as e:
             raise ConditionNotFoundException(
-                "Name of ConditionObject of JobObject does not exist in provided MasterTable")
+                "condition_name of JobObject does not exist in provided MasterTable")
         else:
             return master_table
