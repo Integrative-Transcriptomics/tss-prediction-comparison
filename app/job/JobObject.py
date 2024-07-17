@@ -102,7 +102,8 @@ class JobObject:
                 print(e.message)
             else:
                 common_tss = cs.find_common_tss(self.classified_tss, self.master_table, self.is_reverse_strand)
-                print("common TSS for: " + self.condition_name + "\n" + common_tss)
+                print("common TSS for: " + self.condition_name)
+                print(common_tss)
                 return common_tss
 
     def __get_table_for_condition(self, conditions_of_master_table):

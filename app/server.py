@@ -163,6 +163,7 @@ def upload_file():
 
             # creating Job
             cond_name = condition_names[condition]
+            print(cond_name + "----------------") # debug line
             job = JobObject(filepaths=[path], name=file_name, condition_name=cond_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
             jobRegistry[job.id] = job
             jobQueue.put(job)
@@ -185,6 +186,7 @@ def upload_file():
 
             # creating Job
             cond_name = condition_names[condition]
+
             job = JobObject(filepaths=[path], name=file_name, condition_name=cond_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=True)
             jobRegistry[job.id] = job
             jobQueue.put(job)
