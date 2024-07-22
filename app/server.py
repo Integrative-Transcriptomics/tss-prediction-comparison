@@ -147,7 +147,9 @@ def upload_file():
                     response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
                     return response_object, status_code
 
+        # creating Job for each condition in conditions_forward
         condition_json = {}
+
         for condition in conditions_forward:
             paths = []
             for key in conditions_forward[condition]:
@@ -159,13 +161,18 @@ def upload_file():
                     response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
                     return response_object, status_code
 
-
-            job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
+            # creating Job
+            cond_name = condition_names[condition]
+            print(cond_name + "----------------") # debug line
+            job = JobObject(filepaths=[path], name=file_name, condition_name=cond_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
             jobRegistry[job.id] = job
             jobQueue.put(job)
-            cond_name = condition_names[condition]
+
             condition_json[cond_name] = {"forward": job.id}
             condition_json[cond_name]["uuid"] = str(uuid.uuid4())
+
+
+        # creating Job for each condition in conditions_reverse
         for condition in conditions_reverse:
             paths = []
             for key in conditions_reverse[condition]:
@@ -177,19 +184,24 @@ def upload_file():
                     response_object = jsonify({"Error": "Unsupported file ending: " + file_extension})
                     return response_object, status_code
 
-            job = JobObject(filepaths=[path], name=file_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=True)
+            # creating Job
+            cond_name = condition_names[condition]
+
+            job = JobObject(filepaths=[path], name=file_name, condition_name=cond_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=True)
             jobRegistry[job.id] = job
             jobQueue.put(job)
-            cond_name = condition_names[condition]
-            condition_json[cond_name]["reverse"] = job.id
 
+            # creating ConditionObject for each condition in conditions_reverse
+            # (does also account for conditions in conditions_forward )
+            condition_json[cond_name]["reverse"] = job.id
             condition_object = ConditionObject(name = cond_name, forward_id=condition_json[cond_name]["forward"],
                                                backward_id=condition_json[cond_name]["reverse"])
-
+            # adding ConditionObject to conditionRegistry
             conditionRegistry[condition_object.id] = condition_object
 
+        # creating ProjectObject
         project_object = ProjectObject(project_name=project_name, condition_dict=conditionRegistry)
-
+        # adding ProjectObject to projectRegistry
         projectRegistry[project_object.id] = project_object
 
         print(condition_json)
