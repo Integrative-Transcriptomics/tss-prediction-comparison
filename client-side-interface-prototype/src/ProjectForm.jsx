@@ -141,7 +141,7 @@ function ProjectForm() {
 
   return (
     <div className="project-form">
-      <h1>TSS Prediction Tool</h1>
+      <h1>TSS Prediction and Comparison Tool</h1>
       
       {/* Project Name Input */}
       <div className="form-group">
