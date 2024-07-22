@@ -133,6 +133,11 @@ function JobManagement() {
     return jobIds && jobStatuses[jobIds.forward] === 'Finished' && jobStatuses[jobIds.reverse] === 'Finished';
   }
 
+  const isProjectFinished = (projectId) => {
+    const conditions = projectConditions[projectId];
+    return conditions && conditions.every(([, conditionId]) => isConditionFinished(conditionId));
+  };
+
   const handleViewCondition = (conditionId) => {
     // Navigate to the visualization page for the selected condition
     navigate(`/visualization/${conditionId}`);
@@ -142,6 +147,26 @@ function JobManagement() {
   function refreshPage() {
     window.location.reload();
   }
+
+  // Function to handle the project download as a zip file
+  const handleDownloadProject = async (projectId) => {
+    try {
+      const response = await fetch(`/api/get_zip_file?project_id=${projectId}`);
+      if (!response.ok) {
+        throw new Error('Failed to download project.');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${projectId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error('Error downloading project:', error);
+    }
+  };
 
   // Render the list of projects, conditions, and job statuses
   return (
@@ -153,6 +178,13 @@ function JobManagement() {
           {projects.map(([projectId, projectName]) => (
             <div key={projectId} className="project-box">
               <h2>{projectName}</h2>
+              <button 
+                className={`download-button ${isProjectFinished(projectId) ? 'finished' : 'unfinished'}`} 
+                onClick={() => handleDownloadProject(projectId)} 
+                disabled={!isProjectFinished(projectId)}
+              >
+                Download Project Data
+              </button>
               <ul>
                 {projectConditions[projectId]?.map(([conditionName, conditionId] , index) => (
                   <li key={conditionId} className="condition-box">
