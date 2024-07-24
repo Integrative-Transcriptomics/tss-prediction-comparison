@@ -9,6 +9,9 @@
   margin-left: 80%;
   margin-right: 80%;
 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 /* inner borders of the management page*/
@@ -18,26 +21,18 @@
   padding-left: 60px;
   padding-right: 100px;
   border-radius: 40px;
-  width: 100% auto;
+  width: auto;  /* Wenn du möchtest, dass die Box nur so breit wie der Inhalt ist */
   margin: 10px auto;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-
 .status-not-started {
-    color: gray;
-  }
-  
-  .status-running {
-    color: blue;
-  }
-  
-  .status-finished {
-    color: green;
-  }
-  
-  .status-failed {
-    color: red;
-  }
+  color: gray;
+}
 
   .refresh-button {
     background-color: #4CAF50;
@@ -68,24 +63,58 @@
     cursor: not-allowed;
   }
 
-  .view-condition-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
+.status-finished {
+  color: green;
+}
 
-  .view-condition-button.finished {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .view-condition-button.unfinished {
-    background-color: #f44336;
-    color: white;
-    cursor: not-allowed;
-  }
+.status-failed {
+  color: red;
+}
 
+.refresh-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
-  
+.download-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.download-button.finished {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.download-button.unfinished {
+  background-color: #f44336;
+  color: white;
+  cursor: not-allowed;
+}
+
+.view-condition-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.view-condition-button.finished {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.view-condition-button.unfinished {
+  background-color: #f44336;
+  color: white;
+  cursor: not-allowed;
+}
