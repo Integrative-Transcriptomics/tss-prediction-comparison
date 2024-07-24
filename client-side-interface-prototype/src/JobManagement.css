@@ -25,36 +25,7 @@
 .status-not-started {
   color: gray;
 }
-
-  .refresh-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 2.5%;
-  }
   
-  .download-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  
-  .download-button.finished {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .download-button.unfinished {
-    background-color: #f44336;
-    color: white;
-    cursor: not-allowed;
-  }
-
 .status-finished {
   color: green;
 }
@@ -64,13 +35,16 @@
 }
 
 .refresh-button {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+}
+.refresh-button:hover {
+  background-color: #1e7e34;
 }
 
 .download-button {
@@ -82,8 +56,11 @@
 }
 
 .download-button.finished {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
+}
+.download-button.finished:hover{
+  background-color: #1e7e34;
 }
 
 .download-button.unfinished {
@@ -101,8 +78,11 @@
 }
 
 .view-condition-button.finished {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
+}
+.view-condition-button.finished:hover {
+  background-color: #1e7e34;
 }
 
 .view-condition-button.unfinished {
