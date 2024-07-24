@@ -9,10 +9,6 @@
   margin-left: 80%;
   margin-right: 80%;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 /* inner borders of the management page*/
 .project-box {
@@ -21,13 +17,9 @@
   padding-left: 60px;
   padding-right: 100px;
   border-radius: 40px;
-  width: auto;  /* Wenn du möchtest, dass die Box nur so breit wie der Inhalt ist */
+  width: auto;  
   margin: 10px auto;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .status-not-started {
