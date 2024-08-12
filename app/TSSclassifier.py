@@ -176,4 +176,6 @@ def find_common_tss(prediction, master_table, strand):
     common_tss_df = pd.merge(expanded_prediction, mt_relevant_columns, on=['Pos', 'TSS type'],
                              how='inner').drop_duplicates()
 
+    common_tss_df['Strand'] = '+' if not strand else '-'
+
     return common_tss_df
