@@ -20,6 +20,8 @@ def tss_predictor_sklearn(data_frame, reverse=False):
 
 
     if(not data_frame.empty):
+
+        indices = data_frame.index
         if(reverse):
             y = classifier_reverse.predict(data_frame)
             tss = np.where(y == 1)[0]
@@ -35,7 +37,7 @@ def tss_predictor_sklearn(data_frame, reverse=False):
         confidence_list = []
 
         for index, site in enumerate(tss):
-            tss_list.append(site)
+            tss_list.append(indices[site])
             confidence_list.append(float(probabilities[index]))
     else:
         tss_list = []
