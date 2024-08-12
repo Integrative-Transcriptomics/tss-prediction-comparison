@@ -24,7 +24,7 @@ const GFF = forwardRef((props, ref) => {
   return (
     <div className="form-group">
       {/* Label for the GFF file upload section */}
-      <label><b>Upload GFF-file (optional):</b></label>
+      <label><b>Upload GFF-file:</b></label>
       
       {/* File input for uploading the GFF file */}
       <input
