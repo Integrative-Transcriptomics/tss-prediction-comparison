@@ -24,7 +24,7 @@ const TssMasterTable = forwardRef((props, ref) => {
   return (
     <div className="form-group">
       {/* Label for the master table file upload section */}
-      <label><b>Upload master table from TSS predator (optional):</b></label>
+      <label><b>Upload master table from TSS predator:</b></label>
       
       {/* File input for uploading the master table file */}
       <input

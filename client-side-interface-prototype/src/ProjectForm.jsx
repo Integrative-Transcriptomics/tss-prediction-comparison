@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useOutlet } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -166,7 +166,7 @@ function ProjectForm() {
               <input 
                 type = "text"  
                 onChange={(e) => updateConditionName(condition.id, e.target.value)}
-                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the Mastertable if given one)`} 
+                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the mastertable)`} 
               >
               </input>
             </div>
