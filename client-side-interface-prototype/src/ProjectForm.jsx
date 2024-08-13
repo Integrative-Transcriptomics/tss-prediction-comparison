@@ -80,7 +80,7 @@ function ProjectForm() {
     }
 
     if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
-      setErrorMessage('Please upload a TSS Master Table file for the comparison.');
+      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
       return;
     }
 
