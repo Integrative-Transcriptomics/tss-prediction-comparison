@@ -21,4 +21,6 @@ class ConditionObject:
 
         combined = pd.concat([tss_df_forward, tss_df_reverse])
 
-        return combined
+        cleaned = combined.drop_duplicates()
+
+        return cleaned
