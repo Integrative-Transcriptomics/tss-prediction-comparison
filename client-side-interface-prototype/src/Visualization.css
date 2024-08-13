@@ -35,3 +35,20 @@
     font-weight: bold;
     color: #009879;
 }
+
+.visualization-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    
+    margin-left: 70%;
+    margin-right: -50%;
+    
+}
+
+.visualization-content {
+    max-width: 200%;
+    width: 200%;
+}

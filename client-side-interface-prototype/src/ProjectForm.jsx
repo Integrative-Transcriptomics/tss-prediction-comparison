@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useOutlet } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Condition from './Condition';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
@@ -70,35 +70,36 @@ function ProjectForm() {
     // clear previous error messages
     setErrorMessage('');
 
+    // Set the feedback message
+    setFeedbackMessage('');
+
     // Error message if project name is empty
     if (!projectName.trim()) {
       setErrorMessage('Project Name cannot be empty.');
       return
     }
 
+    if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
+      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
+      return;
+    }
 
-    // Set the feedback message
-    setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
+    if (!gffRef.current || !gffRef.current.file) {
+      setErrorMessage('Please upload a GFF file for the TSS classification.');
+      return;
+    }
 
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
 
-    // Append the name of the project to the FormData object if it exists.
-    if (!projectName.trim()) {
-      console.error('Project Name cannot be empty.');
-    } else {
+    // Append the name of the project to the FormData object.
       formData.append('projectName', projectName);
-    }
-
-    // Append the GFF file to the FormData object if it exists.
-    if (gffRef.current && gffRef.current.file) {
+    
+    // Append the GFF file to the FormData object.
       formData.append('gff', gffRef.current.file, 'gff-file.gff');
-    }
 
-    // Append the TSS Master Table file to the FormData object if it exists.
-    if (tssMasterTableRef.current && tssMasterTableRef.current.file) {
+    // Append the TSS Master Table file to the FormData object.
       formData.append('master_table', tssMasterTableRef.current.file, 'master-table.tsv');
-    }
 
     // Append the forward and reverse files for each condition to the FormData object.
     conditions.forEach((condition, index) => {
@@ -117,6 +118,10 @@ function ProjectForm() {
     });
 
     try {
+
+      // Indicate that the files are being uploaded.
+      setFeedbackMessage('Files are currently uploading, please wait a few seconds...');
+
       // Send the FormData object to the backend using a POST request.
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -125,7 +130,11 @@ function ProjectForm() {
 
       // Check if the response is successful.
       if (response.ok) {
+        const result = await response.json();
+
+        // If the server sends a success message, set the feedback message.
         console.log('Files successfully uploaded');
+        setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
       } else {
         console.error('File upload failed');
       }
@@ -141,7 +150,8 @@ function ProjectForm() {
 
   return (
     <div className="project-form">
-      <h1>TSS Prediction and Comparison Tool</h1>
+      <h1>TSSplorer</h1>
+      <p className="subheading"> TSS prediction and comparison Tool</p>
       
       {/* Project Name Input */}
       <div className="form-group">
@@ -166,7 +176,7 @@ function ProjectForm() {
               <input 
                 type = "text"  
                 onChange={(e) => updateConditionName(condition.id, e.target.value)}
-                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the Mastertable if given one)`} 
+                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the mastertable)`} 
               >
               </input>
             </div>

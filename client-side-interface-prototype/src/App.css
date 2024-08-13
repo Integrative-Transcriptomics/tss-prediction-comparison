@@ -26,6 +26,11 @@ label {
   margin-bottom: 5px;
 }
 
+.subheading {
+  font-family: Arial, sans-serif;
+  font-size: 25px;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="file"] {
