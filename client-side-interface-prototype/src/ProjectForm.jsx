@@ -27,6 +27,12 @@ function ProjectForm() {
   // State to manage the error message displayed if no project name was given
   const [errorMessage, setErrorMessage] = useState('');
 
+  // State to track the previous project name for preventing re-upload with the same name.
+  const [previousProjectName, setPreviousProjectName] = useState('');
+
+  // State to track if the file upload is complete.
+  const [isUploadComplete, setIsUploadComplete] = useState(true);
+
   // Function to add a new condition to the list. It creates a new condition with a name, a unique id and a reference.
   const addCondition = () => {
     const index = conditions.length + 1;
@@ -77,6 +83,11 @@ function ProjectForm() {
     if (!projectName.trim()) {
       setErrorMessage('Project Name cannot be empty.');
       return
+    }
+
+    if (projectName === previousProjectName) {
+      setErrorMessage('The Project Name cannot be uploaded twice.');
+      return;
     }
 
     // Check for matching forward and reverse file counts
@@ -137,6 +148,8 @@ function ProjectForm() {
 
     try {
 
+      setIsUploadComplete(false);
+
       // Indicate that the files are being uploaded.
       setFeedbackMessage('Files are currently uploading, please wait a few seconds...');
 
@@ -153,13 +166,19 @@ function ProjectForm() {
         // If the server sends a success message, set the feedback message.
         console.log('Files successfully uploaded');
         setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
+
+        // Update previous project name to current project name after successful upload
+        setPreviousProjectName(projectName);
+
       } else {
         console.error('File upload failed');
       }
     } catch (error) {
       console.error('Error uploading files:', error);
-    }
+    } finally {
+      setIsUploadComplete(true); // Indicate that the file upload is complete.
   };
+};
 
   const handleLoadJobManagement = () => {
     // Navigate to the Job Management page using the navigate function from the useNavigate hook.
@@ -219,7 +238,11 @@ function ProjectForm() {
       {/* Buttons Container */}
       <div className='buttons-container'> 
       {/* Submit Button */}
-      <button className="start-button" onClick={handleSubmit}>Start TSS Prediction</button>
+      <button className="start-button" 
+      onClick={handleSubmit}
+      disabled={!isUploadComplete}
+      >Start TSS Prediction
+      </button>
       {/* Job Management Page Button */}
       <button className="load-job-button" onClick={handleLoadJobManagement}>Load Project-Manager</button>
     </div>
