@@ -79,6 +79,24 @@ function ProjectForm() {
       return
     }
 
+    // Check for matching forward and reverse file counts
+    for (const condition of conditions) {
+      const conditionRef = condition.ref.current;
+      if (conditionRef) {
+         // Check if the number of forward and reverse files are equal
+        if (conditionRef.forwardFiles.length !== conditionRef.reverseFiles.length) {
+          setErrorMessage(`The number of forward and reverse files for ${condition.name} do not match.`);
+          return;
+        }
+          
+        // Check if there are any files uploaded for this condition
+        if (conditionRef.forwardFiles.length === 0 && conditionRef.reverseFiles.length === 0) {
+           setErrorMessage(`No files uploaded for Condition ${condition.id}.`);
+           return;
+        }
+      }
+    }
+
     if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
       setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
       return;
