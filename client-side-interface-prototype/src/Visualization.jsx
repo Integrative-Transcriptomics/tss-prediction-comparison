@@ -162,17 +162,19 @@ function Visualization() {
   );
 
   return (
-    <div>
-      <h1>Visualization Page</h1>
-      <p>This is the visualization content for Condition ID: {conditionId}</p>
-      
-      <div id="echarts" style={{ width: '100%', height: '600px' }}></div>
-
-      {forwardParsedData.length > 0 && renderTable(forwardParsedData, 'Forward Job Data', isForwardVisible, () => setIsForwardVisible(!isForwardVisible))}
-      {reverseParsedData.length > 0 && renderTable(reverseParsedData, 'Reverse Job Data', isReverseVisible, () => setIsReverseVisible(!isReverseVisible))}
-      {commonParsedData.length > 0 && renderTable(commonParsedData, 'Common TSS Data', isCommonVisible, () => setIsCommonVisible(!isCommonVisible))}
-      
-      <UpSetPlot conditionId={conditionId} /> {/* Add UpSetPlot component here */}
+    <div className="visualization-container">
+      <div className="visualization-content">
+        <h1>Visualization Page</h1>
+        <p>This is the visualization content for Condition ID: {conditionId}</p>
+        
+        <div id="echarts" style={{ width: '100%', height: '600px' }}></div>
+  
+        {forwardParsedData.length > 0 && renderTable(forwardParsedData, 'Forward Job Data', isForwardVisible, () => setIsForwardVisible(!isForwardVisible))}
+        {reverseParsedData.length > 0 && renderTable(reverseParsedData, 'Reverse Job Data', isReverseVisible, () => setIsReverseVisible(!isReverseVisible))}
+        {commonParsedData.length > 0 && renderTable(commonParsedData, 'Common TSS Data', isCommonVisible, () => setIsCommonVisible(!isCommonVisible))}
+        
+        <UpSetPlot conditionId={conditionId} /> {/* Add UpSetPlot component here */}
+      </div>
     </div>
   );
 }
