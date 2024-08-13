@@ -1,27 +1,3 @@
-# Willkommen zum Teamprojekt!
-
-Project: Comparing and Visualizing Predicted Transcription Start Sites on Prokaryotes
-
-In diesem Github Repository wird ein großer Teil Eurer Arbeit stattfinden.
-Bitte stellt sicher, dass Ihr
-
-> [Anforderungen im Teamprojekt](COURSE-DESCRIPTION.md)
-
-lest.
-
-## GitHub Tour
-
-- In [Issues](../../issues) könnt Ihr entdeckte Fehler (Bugs), User Stories und andere Tickets festhalten, damit ihr nicht vergesst diese zu bearbeiten.
-
-- [Pull Requests](../../pulls) sind spezielle Issues, die dazu verwendet werden, um Code Reviews durchzuführen.
-
-- In [Projects](../../projects) könnt Ihr Euch ein Sprint Board anlegen, um die nächste Iteration zu planen und Euren Fortschritt nachzuvollziehen. Eine Vorlage kann [hier](https://github.com/se-tuebingen/teamprojekt-vorlage/projects/1) gefunden werden.
-
-- Das [Wiki](../../wiki) kann genutzt werden, um zum Beispiel weitere inhaltliche Anforderungen zu erfassen, die Definition-of-Done zu dokumentieren oder Protokolle und Entscheidungen des Teams festzuhalten.
-
-- [Actions](../../actions) erlauben Euch Continuous Integration (CI) und automatisiertes Testen für jeden Pull Request und jedes Release einzurichten. -> This is not a must, but you can still use it to make your work easier.
-
-
 # TSSplorer - A tool for comparing and visualizing predicted transcription start sites in prokaryotes
 
 ## What is a transcription start site (TSS) and what do we need it for?
@@ -40,7 +16,7 @@ More on the biological backgrounds of transcription in prokaryotes in the [wiki]
 
 
 ## What distinguishes TSSplorer from other TSS prediction tools like TSSpredator?
-## How to use TTSplorer?
+## How to use TSSplorer?
 ## Workflow
 ## Languages and tools used in this project
 - Visualization: Plotly
