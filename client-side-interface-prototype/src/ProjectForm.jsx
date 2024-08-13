@@ -80,12 +80,12 @@ function ProjectForm() {
     }
 
     if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
-      setErrorMessage('Please upload a TSS Master Table file.');
+      setErrorMessage('Please upload a TSS Master Table file for the comparison.');
       return;
     }
 
     if (!gffRef.current || !gffRef.current.file) {
-      setErrorMessage('Please upload a GFF file.');
+      setErrorMessage('Please upload a GFF file for the TSS classification.');
       return;
     }
 
