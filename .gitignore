@@ -12,6 +12,11 @@ tests/__pycache__
 model_training/data_bacteroides/*
 node_modules
 yarn.lock
+model_training/Data
+model_training/data_bacteroides
+model_training/.ipynb_checkpoints
+
+*.pyc
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

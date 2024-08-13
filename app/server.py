@@ -330,6 +330,26 @@ def get_tss_by_id():
             response_object = jsonify({"Error": "No file found with id: " + id})
         return response_object, status_code
 
+
+# gets tss prediction by condition id. Fails if Job state is not finished.
+@app.route("/api/get_combined_tss", methods=["GET"])
+def get_combined_tss_by_id():
+    if request.method == 'GET':
+        id = request.args.get('condition', type=str)
+        condition = get_condition_by_id(id)
+        if condition:
+            try:
+                condition_df = condition.get_combined_tss(jobRegistry)
+                response_object = df_to_response(condition_df, "tss_prediction_combined.csv")
+                status_code = 200
+            except NotReadyException as e:
+                status_code = 400
+                response_object = jsonify({"Error": e.message})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
 # gets tss comparison by id. Fails if Job state is not finished.
 @app.route("/api/get_common", methods=["GET"])
 def get_common_by_id():
