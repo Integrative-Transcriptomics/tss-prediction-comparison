@@ -87,7 +87,21 @@ function Visualization() {
       };
       const forwardData = processData(forwardParsedData);
       const reverseData = processData(reverseParsedData);
+
+      // Get all gene names and sort them to ensure consistent order
       const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)]));
+
+      // Sort genes by total count (descending) and take the top 10
+      const topGeneNames = fileNames
+        .map(fileName => {
+          const totalCount = Object.values(forwardData[fileName] || {}).reduce((sum, count) => sum + count, 0)
+            + Object.values(reverseData[fileName] || {}).reduce((sum, count) => sum + count, 0);
+          return { fileName, totalCount };
+        })
+        .sort((a, b) => b.totalCount - a.totalCount)
+        .slice(0, 10)
+        .map(item => item.fileName);
+
       const tssTypes = Array.from(new Set([...forwardParsedData.map(row => row['TSS type']), ...reverseParsedData.map(row => row['TSS type'])]));
       const seriesData = tssTypes.map(tssType => {
         return {
@@ -96,7 +110,7 @@ function Visualization() {
           stack: 'total',
           label: { show: true },
           emphasis: { focus: 'series' },
-          data: fileNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
+          data: topGeneNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
         };
       });
       const option = {
@@ -104,7 +118,7 @@ function Visualization() {
         legend: {},
         grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
         xAxis: { type: 'value' },
-        yAxis: { type: 'category', data: fileNames },
+        yAxis: { type: 'category', data: topGeneNames },
         series: seriesData
       };
       myChart.setOption(option);
