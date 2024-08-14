@@ -215,6 +215,26 @@ def upload_file():
 
         return response_object, status_code
 
+@app.route("/api/get_upsetplot", methods=["GET"])
+def get_upsetplot():
+    if(request.method == "GET"):
+        condition_id = request.args.get("condition", type=str)
+        print(condition_id)
+        condition = get_condition_by_id(condition_id)
+
+        if condition:
+            try:
+                upset_df = condition.get_upsetplot_df(jobRegistry)
+                response_object = df_to_response(upset_df, "upsetplot_df.csv")
+                status_code = 200
+            except NotReadyException as e:
+                status_code = 400
+                response_object = jsonify({"Error": e.message})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + condition_id})
+        return response_object, status_code
+
 
 # get files by project id. Returns a zipped file of processed wiggle files, predictions, common tss, the gff file and
 # the master table (if uploaded)
