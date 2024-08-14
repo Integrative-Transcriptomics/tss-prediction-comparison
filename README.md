@@ -15,7 +15,9 @@ Studying the TSS of prokaryotes is interesting for several reasons:
 More on the biological backgrounds of transcription in prokaryotes in the [wiki](https://github.com/Integrative-Transcriptomics/tss-prediction-comparison/wiki/Prokaryotic-gene-structure-and-transcription).
 
 
-## What distinguishes TSSplorer from other TSS prediction tools like TSSpredator?
+## What distinguishes TSSplorer from other TSS prediction tools especially TSSpredator?
+Differences will be added soon.
+
 ## How to use TSSplorer?
 1. Input the following:
    - The name of your project (on the management site you will find your submission under this name)
@@ -32,8 +34,12 @@ More on the biological backgrounds of transcription in prokaryotes in the [wiki]
 Remember that you're not limited to uploading just one project. Head back to the initial page and upload another project, the management page will show all projects that you have submitted while on the TSSplorer website. 
  
 ## Workflow
+Workflow will be added shortly.
+
 ## Languages and tools used in this project
-- Visualization: Plotly
+- Visualization: 
+  - Upset plots
+  - Echarts library
 - Frontend: 
   - Language: JavaScript
   - Framework: React
@@ -41,6 +47,8 @@ Remember that you're not limited to uploading just one project. Head back to the
   - Python
 ## Contact
 If you encounter any problems using TSSplorer please feel free to create an issue or contact us via email: 
+
+markus.henkel@student.uni-tuebingen.de
 
 
 
