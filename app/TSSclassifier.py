@@ -36,9 +36,13 @@ def prepare_gff(gff_df):
         """
     gff_df['gene name'] = gff_df['attributes'].apply(extract_gene_name)
 
-    if gff_df['gene name'].isnull().all():
-        raise GffFormatException(
-            "the attributes column of your GFF file does not contain gene names in the format 'Name=..")
+    try:
+        if gff_df['gene name'].isnull().all() and not gff_df.empty:
+            raise GffFormatException(
+                "the attributes column of your GFF file does not contain gene names in the format 'Name=..")
+
+    except GffFormatException as e:
+        print(e)
 
     gff_fw = gff_df[(gff_df['strand'] == "+")]
     gff_rv = gff_df[(gff_df['strand'] == "-")]
@@ -175,6 +179,8 @@ def find_common_tss(prediction, master_table, strand):
 
     common_tss_df = pd.merge(expanded_prediction, mt_relevant_columns, on=['Pos', 'TSS type'],
                              how='inner').drop_duplicates()
+
+    common_tss_df = common_tss_df.sort_values(by='Pos', ascending=True).reset_index(drop=True)
 
     common_tss_df['Strand'] = '+' if not strand else '-'
 

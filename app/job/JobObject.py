@@ -27,9 +27,9 @@ class JobObject:
                  filepaths,
                  name,
                  condition_name,
-                 master_table_path = None,
-                 gff_path = None,
-                 is_reverse_strand = False):
+                 master_table_path=None,
+                 gff_path=None,
+                 is_reverse_strand=False):
 
         self.name = name
         self.id = str(uuid.uuid4())
@@ -42,23 +42,23 @@ class JobObject:
         self.classified_tss = None
         self.common_tss = None
         self.master_table = None
-        self.condition_name = condition_name # upload_file in server.py needs to be adjusted
+        self.condition_name = condition_name  # upload_file in server.py needs to be adjusted
 
     def get_file(self, type):
         if self.status == JobStatus.FINISHED:
 
-            if(type == returnType.TSS):
-                if(self.gff_path is None):
+            if (type == returnType.TSS):
+                if (self.gff_path is None):
                     raise NotSuppliedException("The gff file was not supplied")
                 else:
                     return self.classified_tss
-            if(type == returnType.COMMON):
-                if(self.common_tss is None):
+            if (type == returnType.COMMON):
+                if (self.common_tss is None):
                     raise NotSuppliedException("The Master Table or gff file was not supplied")
                 else:
                     return self.common_tss
-            if(type == returnType.MASTERTABLE):
-                if(self.master_table is None):
+            if (type == returnType.MASTERTABLE):
+                if (self.master_table is None):
                     raise NotSuppliedException("The Master Table was not supplied")
                 else:
                     return self.master_table
@@ -68,7 +68,7 @@ class JobObject:
             raise NotReadyException("Job is not done yet")
 
     def get_processed_df(self):
-        if(self.processedDF is not None):
+        if (self.processedDF is not None):
             return self.processedDF
         else:
             raise NotReadyException("Computing the mean df is not done yet")
@@ -80,14 +80,18 @@ class JobObject:
 
         print(tss_list, confidence_list)
 
-        if(not (self.gff_path is None)):
+        if (not (self.gff_path is None)):
             gff_df = ps.parse_gff_to_df(self.gff_path)
             self.classified_tss = cs.classify(gff_df, tss_list, confidence_list, self.is_reverse_strand)
             print(self.classified_tss)
 
-        self.common_tss = self.__compute_common_tss()
-
-        self.status = JobStatus.FINISHED
+        try:
+            self.common_tss = self.__compute_common_tss()
+        except Exception as e:
+            self.status = JobStatus.FAILED
+            print(e)
+        else:
+            self.status = JobStatus.FINISHED
 
     def __compute_common_tss(self):
         """
@@ -97,24 +101,12 @@ class JobObject:
         if (not (self.master_table_path is None)):
             conditions_of_master_table = mtp.parse_master_table(self.master_table_path)
             try:
-                self.master_table = self.__get_table_for_condition(conditions_of_master_table)
-            except ConditionNotFoundException as e:
-                print(e.message)
+                self.master_table = conditions_of_master_table[self.condition_name]
+            except KeyError as e:
+                raise ConditionNotFoundException(
+                    "condition_name of JobObject: " + self.condition_name + " does not exist in provided MasterTable") from e
             else:
-                self.common_tss = cs.find_common_tss(self.classified_tss, self.master_table, self.is_reverse_strand)
+                common_tss = cs.find_common_tss(self.classified_tss, self.master_table, self.is_reverse_strand)
                 print("common TSS for: " + self.condition_name)
-                print(self.common_tss)
-                return self.common_tss
-
-    def __get_table_for_condition(self, conditions_of_master_table):
-        """
-        :param conditions_of_master_table: dict of dataFrames representing TSS for each condition in MasterTable
-        :return: the corresponding MasterTable to this
-        """
-        try:
-            master_table = conditions_of_master_table[self.condition_name]
-        except KeyError as e:
-            raise ConditionNotFoundException(
-                "condition_name of JobObject: " + self.condition_name + " does not exist in provided MasterTable")
-        else:
-            return master_table
+                print(common_tss)
+                return common_tss
