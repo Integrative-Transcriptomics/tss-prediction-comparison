@@ -89,7 +89,7 @@ function ProjectForm() {
       setErrorMessage('The Project Name cannot be uploaded twice.');
       return;
     }
-
+    
     // Check for matching forward and reverse file counts
     for (const condition of conditions) {
       const conditionRef = condition.ref.current;
@@ -117,6 +117,14 @@ function ProjectForm() {
       setErrorMessage('Please upload a GFF file for the TSS classification.');
       return;
     }
+
+    // Error message if any condition name is empty
+    for (const condition of conditions) {
+      if (!condition.name.trim()) {
+          setErrorMessage(`Condition ${condition.id} name cannot be empty.`);
+          return;
+      }
+  }
 
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
