@@ -187,7 +187,7 @@ function JobManagement() {
         <div className="projects-container">
             <h1>Project Manager</h1>
             <button className="refresh-button" onClick={refreshPage}>Refresh Statuses</button>
-            {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>} {/* Display feedback message */}
+            {feedbackMessage && <p className="feedback-message-donwload">{feedbackMessage}</p>} {/* Display feedback message */}
             <ul>
                 {projects.map(([projectId, projectName]) => (
                     <div key={projectId} className="project-box">
