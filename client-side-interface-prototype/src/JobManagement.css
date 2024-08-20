@@ -90,3 +90,10 @@
   color: white;
   cursor: not-allowed;
 }
+
+.feedback-message {
+  margin-top: 10px;
+  color: #333;
+  font-size: 1rem;
+  font-weight: bold;
+}

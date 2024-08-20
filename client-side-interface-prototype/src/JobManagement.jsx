@@ -15,6 +15,9 @@ function JobManagement() {
   const [jobStatuses, setJobStatuses] = useState({});
   // Use the useNavigate hook to navigate to a different page.
   const navigate = useNavigate();
+  // State to manage loading state and feedback message for project download
+  const [loadingProjectId, setLoadingProjectId] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
 
   useEffect(() => {
     // Fetch all projects that are currently in the database
@@ -148,70 +151,81 @@ function JobManagement() {
     window.location.reload();
   }
 
-  // Function to handle the project download as a zip file
   const handleDownloadProject = async (projectId) => {
     try {
-      const response = await fetch(`/api/get_zip_file?project_id=${projectId}`);
-      if (!response.ok) {
-        throw new Error('Failed to download project.');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${projectId}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+        // Set loading state and feedback message
+        setLoadingProjectId(projectId);
+        setFeedbackMessage('Downloading project data, please wait...');
+
+        const response = await fetch(`/api/get_zip_file?project_id=${projectId}`);
+        if (!response.ok) {
+            throw new Error('Failed to download project.');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${projectId}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // Update feedback message on success
+        setFeedbackMessage('Project data downloaded successfully.');
     } catch (error) {
-      console.error('Error downloading project:', error);
+        console.error('Error downloading project:', error);
+        setFeedbackMessage('Failed to download project data.');
+    } finally {
+        // Reset loading state
+        setLoadingProjectId(null);
     }
-  };
+};
 
   // Render the list of projects, conditions, and job statuses
   return (
-    <div className="App">
-      <div className="projects-container">
-        <h1>Project Manager</h1>
-        <button className="refresh-button" onClick={refreshPage}>Refresh Statuses</button>
-        <ul>
-          {projects.map(([projectId, projectName]) => (
-            <div key={projectId} className="project-box">
-              <h2>{projectName}</h2>
-              <button 
-                className={`download-button ${isProjectFinished(projectId) ? 'finished' : 'unfinished'}`} 
-                onClick={() => handleDownloadProject(projectId)} 
-                disabled={!isProjectFinished(projectId)}
-              >
-                Download Project Data
-              </button>
-              <ul>
-                {projectConditions[projectId]?.map(([conditionName, conditionId] , index) => (
-                  <li key={conditionId} className="condition-box">
-                    <h3>{conditionName}</h3>
-                    <ul>
-                      <li>
-                        Forward Job ID: {conditionsJobs[conditionId]?.forward}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.forward])}
-                      </li>
-                      <li>
-                        Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
-                      </li>
-                    </ul>
-                    {/* Button to view condition, with numbering based on index */}
-                    <button  className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
-                      onClick={() => handleViewCondition(conditionId)}
-                      disabled={!isConditionFinished(conditionId)}
-                    >
-                    View Condition
-                    </button>
-                  </li>
+      <div className="App">
+        <div className="projects-container">
+            <h1>Project Manager</h1>
+            <button className="refresh-button" onClick={refreshPage}>Refresh Statuses</button>
+            {feedbackMessage && <p className="feedback-message">{feedbackMessage}</p>} {/* Display feedback message */}
+            <ul>
+                {projects.map(([projectId, projectName]) => (
+                    <div key={projectId} className="project-box">
+                        <h2>{projectName}</h2>
+                        <button 
+                            className={`download-button ${isProjectFinished(projectId) ? 'finished' : 'unfinished'}`} 
+                            onClick={() => handleDownloadProject(projectId)} 
+                            disabled={!isProjectFinished(projectId) || loadingProjectId === projectId}
+                        >
+                            {loadingProjectId === projectId ? 'Downloading...' : 'Download Project Data'}
+                        </button>
+                        <ul>
+                            {projectConditions[projectId]?.map(([conditionName, conditionId], index) => (
+                                <li key={conditionId} className="condition-box">
+                                    <h3>{conditionName}</h3>
+                                    <ul>
+                                        <li>
+                                            Forward Job ID: {conditionsJobs[conditionId]?.forward}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.forward])}
+                                        </li>
+                                        <li>
+                                            Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
+                                        </li>
+                                    </ul>
+                                    <button 
+                                        className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
+                                        onClick={() => handleViewCondition(conditionId)}
+                                        disabled={!isConditionFinished(conditionId)}
+                                    >
+                                        View Condition
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 ))}
-              </ul>
-            </div>
-          ))}
-        </ul>
-      </div>
-    </div>
+            </ul>
+        </div>
+  </div>
   );
 }
 
