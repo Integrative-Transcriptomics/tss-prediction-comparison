@@ -10,7 +10,7 @@ function ProjectForm() {
   const [projectName, setProjectName] = useState('');
   
   // State for managing the list of conditions. Each condition has a name, a unique id and a reference for handling file uploads.
-  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef(), name: 'Condition 1' }]);
+  const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef(), name: "" }]);
   
   // Reference for the GFF component to access its file state.
   const gffRef = useRef(null);
@@ -37,7 +37,7 @@ function ProjectForm() {
   const addCondition = () => {
     const index = conditions.length + 1;
     // back-ticks not single quotes for variables inside strings
-    setConditions([...conditions, { id: index, ref: React.createRef(), name: `Condition ${index}` }]);
+    setConditions([...conditions, { id: index, ref: React.createRef(), name: "" }]);
   };
 
   // Function for updating the condition name given the chosen conditions id and the new chosen name
@@ -107,24 +107,27 @@ function ProjectForm() {
         }
       }
     }
-
-    if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
-      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
-      return;
-    }
-
-    if (!gffRef.current || !gffRef.current.file) {
-      setErrorMessage('Please upload a GFF file for the TSS classification.');
-      return;
-    }
-
+    
     // Error message if any condition name is empty
     for (const condition of conditions) {
       if (!condition.name.trim()) {
           setErrorMessage(`Condition ${condition.id} name cannot be empty.`);
           return;
       }
-  }
+    }
+
+    // Error message if user didnt provide tss mastertable
+    if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
+      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
+      return;
+    }
+
+    // Error message if user didnt provide gff file
+    if (!gffRef.current || !gffRef.current.file) {
+      setErrorMessage('Please upload a GFF file for the TSS classification.');
+      return;
+    }
+
 
     // Create a FormData object to send files and data via a multipart/form-data request.
     const formData = new FormData();
