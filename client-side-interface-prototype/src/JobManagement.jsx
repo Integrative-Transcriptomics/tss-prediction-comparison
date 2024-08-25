@@ -7,96 +7,91 @@ function JobManagement() {
 
   // State to store the list of projects fetched from the server.
   const [projects, setProjects] = useState([]);
+  /* 
+  Example projects data structure:
+  projects = [["project1", "Project Alpha"], ["project2", "Project Beta"]] 
+  */
+
   // State to store the conditions for each project.
   const [projectConditions, setProjectConditions] = useState({});
+  /* 
+  Example projectConditions data structure:
+   projectConditions = {
+     project1: [["Condition A", "condition1"],["Condition B", "condition2"]],
+     project2: [["Condition X", "condition3"],["Condition Y", "condition4"]]}
+  */
+ 
   // State to store the job IDs for each condition.
   const [conditionsJobs, setConditionsJobs] = useState({});
+  /* 
+  Example Job IDs data structure:
+  conditionsJobs = {condition1: { forward: "job1_forward", reverse: "job1_reverse" },
+                    condition2: { forward: "job2_forward", reverse: "job2_reverse" }}
+  */
+
   // State to store the status of each job.
   const [jobStatuses, setJobStatuses] = useState({});
+  /* 
+  Example jobStatuses data structure:
+   jobStatuses = {
+    job1_forward: "Finished",
+    job1_reverse: "Running",
+    job2_forward: "Not started",
+    job2_reverse: "Finished",
+  }
+  */
+
   // Use the useNavigate hook to navigate to a different page.
   const navigate = useNavigate();
-  // State to manage loading state and feedback message for project download
+
+  // State to manage the project ID that is currently being downloaded.
   const [loadingProjectId, setLoadingProjectId] = useState(null);
+
+  // State to manage the feedback message displayed while downloading.
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
   useEffect(() => {
-    // Fetch all projects that are currently in the database
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/get_project_list');
-        if (!response.ok) {
-          // If the response is not successful, throw an error
+        // Fetch all projects that are currently in the database
+        const projectResponse = await fetch('/api/get_project_list');
+        if (!projectResponse.ok) {
           throw new Error('Failed to fetch project list.');
         }
-        // Parse the response data as JSON
-        const data = await response.json();
-        // Update the state with the fetched projects
-        setProjects(Object.entries(data));
-      } catch (error) {
-        console.error('Error fetching project list:', error);
-      }
-    };
+        const projectData = await projectResponse.json();
+        setProjects(Object.entries(projectData));
 
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    // Fetch conditions for each project
-    const fetchConditions = async () => {
-      try {
         // Fetch conditions for each project
         const conditions = {};
-        for (const [projectId] of projects) {
-          const response = await fetch(`/api/get_conditions?project_id=${projectId}`);
-          if (!response.ok) {
+        for (const [projectId] of Object.entries(projectData)) {
+          const conditionsResponse = await fetch(`/api/get_conditions?project_id=${projectId}`);
+          if (!conditionsResponse.ok) {
             throw new Error(`Failed to fetch conditions for project ${projectId}.`);
           }
-          // Parse the response data as JSON
-          const data = await response.json();
-          // Store the conditions for each project
-          conditions[projectId] = Object.entries(data);
+          const conditionsData = await conditionsResponse.json();
+          conditions[projectId] = Object.entries(conditionsData);
         }
-        // Update the state with the fetched conditions
         setProjectConditions(conditions);
-      } catch (error) {
-        console.error('Error fetching conditions:', error);
-      }
-    };
 
-    if (projects.length > 0) {
-      // Fetch conditions for each project if projects exist
-      fetchConditions();
-    }
-  }, [projects]);
-
-  useEffect(() => {
-    // Fetch job IDs and statuses for each condition
-    const fetchJobs = async () => {
-      try {
+        // Fetch job IDs and statuses for each condition
         const jobs = {};
         const statuses = {};
-        // Fetch job IDs for each condition
-        for (const projectId in projectConditions) {
-          // Iterate over the conditions for each project
-          for (const [, conditionId] of projectConditions[projectId]) {
-            const response = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
-            if (!response.ok) {
+        for (const projectId in conditions) {
+          for (const [, conditionId] of conditions[projectId]) {
+            const jobIdsResponse = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
+            if (!jobIdsResponse.ok) {
               throw new Error(`Failed to fetch job IDs for condition ${conditionId}.`);
             }
-            const data = await response.json();
-            jobs[conditionId] = data;
+            const jobIdsData = await jobIdsResponse.json();
+            jobs[conditionId] = jobIdsData;
 
-            // Fetch job statuses
-            const forwardStatusResponse = await fetch(`/api/get_state?jobid=${data.forward}`);
-            const reverseStatusResponse = await fetch(`/api/get_state?jobid=${data.reverse}`);
-            // Check if the responses are successful
+            const forwardStatusResponse = await fetch(`/api/get_state?jobid=${jobIdsData.forward}`);
+            const reverseStatusResponse = await fetch(`/api/get_state?jobid=${jobIdsData.reverse}`);
             if (forwardStatusResponse.ok && reverseStatusResponse.ok) {
-              // Parse the response data as JSON
               const forwardStatus = await forwardStatusResponse.json();
               const reverseStatus = await reverseStatusResponse.json();
-              // Store the job statuses
-              statuses[data.forward] = forwardStatus["Job status"];
-              statuses[data.reverse] = reverseStatus["Job status"];
+              statuses[jobIdsData.forward] = forwardStatus["Job status"];
+              statuses[jobIdsData.reverse] = reverseStatus["Job status"];
             } else {
               throw new Error(`Failed to fetch job statuses for condition ${conditionId}.`);
             }
@@ -105,15 +100,12 @@ function JobManagement() {
         setConditionsJobs(jobs);
         setJobStatuses(statuses);
       } catch (error) {
-        console.error('Error fetching job IDs and statuses:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    // Fetch job IDs and statuses for each condition if conditions exist
-    if (Object.keys(projectConditions).length > 0) {
-      fetchJobs();
-    }
-  }, [projectConditions]);
+    fetchData();
+  }, []);
 
   // Function to render the status of a job
   const renderStatus = (status) => {
@@ -179,53 +171,66 @@ function JobManagement() {
         // Reset loading state
         setLoadingProjectId(null);
     }
-};
+  };
 
-  // Render the list of projects, conditions, and job statuses
+ // Component for rendering individual job status
+ const JobStatus = ({ jobId, status }) => (
+   <div>
+    J ob ID: {jobId}, Status: {renderStatus(status)}
+    </div>
+  );
+
+ // Component for rendering individual conditions
+ const Condition = ({ conditionName, conditionId }) => (
+  <div className="condition-box">
+    <h3>{conditionName}</h3>
+      <div>
+        <JobStatus jobId={conditionsJobs[conditionId]?.forward} status={jobStatuses[conditionsJobs[conditionId]?.forward]} />
+        <JobStatus jobId={conditionsJobs[conditionId]?.reverse} status={jobStatuses[conditionsJobs[conditionId]?.reverse]} />
+      </div>
+      <button
+        className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
+        onClick={() => handleViewCondition(conditionId)}
+        disabled={!isConditionFinished(conditionId)}
+      >
+        View Condition
+      </button>
+    </div>
+  );
+
+  // Component for rendering individual projects
+  const Project = ({ projectId, projectName }) => (
+    <div className="project-box">
+      <h2>{projectName}</h2>
+      <button
+        className={`download-button ${isProjectFinished(projectId) ? 'finished' : 'unfinished'}`}
+        onClick={() => handleDownloadProject(projectId)}
+        disabled={!isProjectFinished(projectId) || loadingProjectId === projectId}
+      >
+        {loadingProjectId === projectId ? 'Downloading...' : 'Download Project Data'}
+      </button>
+      <div>
+        {projectConditions[projectId]?.map(([conditionName, conditionId]) => (
+          <Condition key={conditionId} conditionName={conditionName} conditionId={conditionId} />
+        ))}
+      </div>
+    </div>
+  );
+
+  // Render the JobManagement component
   return (
-      <div className="App">
-        <div className="projects-container">
-            <h1>Project Manager</h1>
-            <button className="refresh-button" onClick={refreshPage}>Refresh Statuses</button>
-            {feedbackMessage && <p className="feedback-message-donwload">{feedbackMessage}</p>} {/* Display feedback message */}
-            <ul>
-                {projects.map(([projectId, projectName]) => (
-                    <div key={projectId} className="project-box">
-                        <h2>{projectName}</h2>
-                        <button 
-                            className={`download-button ${isProjectFinished(projectId) ? 'finished' : 'unfinished'}`} 
-                            onClick={() => handleDownloadProject(projectId)} 
-                            disabled={!isProjectFinished(projectId) || loadingProjectId === projectId}
-                        >
-                            {loadingProjectId === projectId ? 'Downloading...' : 'Download Project Data'}
-                        </button>
-                        <ul>
-                            {projectConditions[projectId]?.map(([conditionName, conditionId], index) => (
-                                <li key={conditionId} className="condition-box">
-                                    <h3>{conditionName}</h3>
-                                    <ul>
-                                        <li>
-                                            Forward Job ID: {conditionsJobs[conditionId]?.forward}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.forward])}
-                                        </li>
-                                        <li>
-                                            Reverse Job ID: {conditionsJobs[conditionId]?.reverse}, Status: {renderStatus(jobStatuses[conditionsJobs[conditionId]?.reverse])}
-                                        </li>
-                                    </ul>
-                                    <button 
-                                        className={`view-condition-button ${isConditionFinished(conditionId) ? 'finished' : 'unfinished'}`}
-                                        onClick={() => handleViewCondition(conditionId)}
-                                        disabled={!isConditionFinished(conditionId)}
-                                    >
-                                        View Condition
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))}
-            </ul>
+    <div className="App">
+      <div className="projects-container">
+        <h1>Project Manager</h1>
+        <button className="refresh-button" onClick={() => window.location.reload()}>Refresh Statuses</button>
+        {feedbackMessage && <p className="feedback-message-download">{feedbackMessage}</p>}
+        <div>
+          {projects.map(([projectId, projectName]) => (
+            <Project key={projectId} projectId={projectId} projectName={projectName} />
+          ))}
         </div>
-  </div>
+      </div>
+    </div>
   );
 }
 
