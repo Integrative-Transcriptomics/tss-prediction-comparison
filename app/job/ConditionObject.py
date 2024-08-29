@@ -55,9 +55,31 @@ class ConditionObject:
             else:
                 rows += [{"Pos": row["Pos"], "TSS type": row["TSS type"], "origin": 1}]
 
-        print(rows)
-
         return_df = pd.DataFrame(rows)
 
-        return return_df
+        return_df['is_duplicate'] = return_df.duplicated('Pos', keep=False)
+
+        priority1_mask = return_df['origin'] == 2 # prioritize common TSS first
+        priority2_mask = return_df['TSS type'] == "pTSS/sTSS" # second priority pTSS
+        priority3_mask = return_df['TSS type'] == "asTSS" # third priority asTSS
+
+        #filter based upon priority masks
+
+        # Rows with duplicates and high priority
+        priority1_rows = return_df[priority1_mask & return_df['is_duplicate']]
+
+        # Rows with duplicates but not priority1
+        priority2_rows = return_df[priority2_mask & ~priority1_mask & return_df['is_duplicate']]
+
+        # Rows with duplicates but not priority2
+        priority3_rows = return_df[ priority3_mask & ~priority2_mask & ~priority1_mask & return_df['is_duplicate']]
+
+        # Rows with no duplicates
+        priority4_rows = return_df[~return_df['is_duplicate']]
+
+        #recombine
+        filtered_df = pd.concat([priority1_rows, priority2_rows, priority3_rows, priority4_rows]).drop_duplicates()
+        filtered_df = filtered_df.drop(columns=['is_duplicate'])
+
+        return filtered_df
 
