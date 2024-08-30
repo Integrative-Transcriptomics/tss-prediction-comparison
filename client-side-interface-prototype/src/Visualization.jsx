@@ -88,19 +88,8 @@ function Visualization() {
       const forwardData = processData(forwardParsedData);
       const reverseData = processData(reverseParsedData);
 
-      // Get all gene names and sort them to ensure consistent order
-      const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)]));
-
-      // Sort genes by total count (descending) and take the top 10
-      const topGeneNames = fileNames
-        .map(fileName => {
-          const totalCount = Object.values(forwardData[fileName] || {}).reduce((sum, count) => sum + count, 0)
-            + Object.values(reverseData[fileName] || {}).reduce((sum, count) => sum + count, 0);
-          return { fileName, totalCount };
-        })
-        .sort((a, b) => b.totalCount - a.totalCount)
-        .slice(0, 10)
-        .map(item => item.fileName);
+      // Get all gene names, sort them alphabetically
+      const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)])).sort((a, b) => a.localeCompare(b));
 
       const tssTypes = Array.from(new Set([...forwardParsedData.map(row => row['TSS type']), ...reverseParsedData.map(row => row['TSS type'])]));
       const seriesData = tssTypes.map(tssType => {
@@ -110,7 +99,7 @@ function Visualization() {
           stack: 'total',
           label: { show: true },
           emphasis: { focus: 'series' },
-          data: topGeneNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
+          data: fileNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
         };
       });
       const option = {
@@ -118,7 +107,21 @@ function Visualization() {
         legend: {},
         grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
         xAxis: { type: 'value' },
-        yAxis: { type: 'category', data: topGeneNames },
+        yAxis: {
+          type: 'category',
+          data: fileNames,
+          axisLabel: {
+            interval: 0, // Show all labels
+            rotate: 45 // Optional: rotate labels for better readability
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          yAxisIndex: 0,
+          filterMode: 'empty',
+          start: 0,
+          end: Math.min(100, 10 * (10 / fileNames.length)) // Adjust scroll based on the number of items
+        }],
         series: seriesData
       };
       myChart.setOption(option);
@@ -181,7 +184,7 @@ function Visualization() {
         <h1>Visualization Page</h1>
         <p>This is the visualization content for Condition ID: {conditionId}</p>
         
-        <div id="echarts" style={{ width: '160%', height: '600px' }}></div>
+        <div id="echarts" style={{ width: '160%', height: '600px', overflowY: 'auto' }}></div>
   
         {forwardParsedData.length > 0 && renderTable(forwardParsedData, 'Forward Job Data', isForwardVisible, () => setIsForwardVisible(!isForwardVisible))}
         {reverseParsedData.length > 0 && renderTable(reverseParsedData, 'Reverse Job Data', isReverseVisible, () => setIsReverseVisible(!isReverseVisible))}
