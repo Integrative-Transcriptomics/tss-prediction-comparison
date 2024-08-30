@@ -23,7 +23,7 @@ Unlike TSSpredator TSSplorer only uses non-enriched data. This means that TSSplo
 1. Input the following:
    - The name of your project (on the management site you will find your submission under this name)
    - your .wig-files of the forward and the reverse strand that were derived under the same condition (for example in an environment with 30°C)
-   - you can multiple forward and reverse files as technical replicates by selecting more files 
+   - you can submit multiple forward and reverse files as technical replicates by selecting more files. Keep in mind that the number of forward files must match the number of reverse files
    - you can add more conditions by pressing the + button under the conditions
    - The mastertable of TSSpredator for the comparison
    - The .gff-file for the TSS classification
@@ -45,7 +45,10 @@ Workflow will be added shortly.
   - Language: JavaScript
   - Framework: React
 - Backend: 
-  - Python
+  - Language: Python
+  - Framework: Flask
+- TSS Prediction:
+  - Scikit-learn
 ## Contact
 If you encounter any problems using TSSplorer please feel free to create an issue or contact us via email: 
 
