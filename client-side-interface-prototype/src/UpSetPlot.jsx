@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UpSetJS, { extractCombinations } from '@upsetjs/react';
 
 const UpSetPlot = ({ conditionId }) => {
@@ -69,7 +69,6 @@ const UpSetPlot = ({ conditionId }) => {
         let existingElem = elems.find(elem => Math.abs(parseInt(elem.name) - pos) <= tolerance);
         
         if (existingElem) {
-          // Verhindere das Hinzufügen desselben Sets mehrmals
           if (!existingElem.sets.includes(setName)) {
             existingElem.sets.push(setName);
           }
