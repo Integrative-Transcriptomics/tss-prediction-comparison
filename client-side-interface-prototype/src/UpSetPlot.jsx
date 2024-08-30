@@ -63,7 +63,7 @@ const UpSetPlot = ({ conditionId }) => {
       const type = row['TSS type'];
       const origin = row['origin'];
 
-      const setName = origin === '0' ? `Tool_${type}` : origin === '1' ? `TSSpredator_${type}` : null;
+      const setName = origin === '0' ? `Plor_${type}` : origin === '1' ? `Pred_${type}` : null;
 
       if (setName) {
         let existingElem = elems.find(elem => Math.abs(parseInt(elem.name) - pos) <= tolerance);
