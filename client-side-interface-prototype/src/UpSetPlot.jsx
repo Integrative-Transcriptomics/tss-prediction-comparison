@@ -69,10 +69,11 @@ const UpSetPlot = ({ conditionId }) => {
         let existingElem = elems.find(elem => Math.abs(parseInt(elem.name) - pos) <= tolerance);
         
         if (existingElem) {
-          console.log(`Existing position found within tolerance for pos: ${pos}. Adding to set:`, setName);
-          existingElem.sets.push(setName);
+          // Verhindere das Hinzufügen desselben Sets mehrmals
+          if (!existingElem.sets.includes(setName)) {
+            existingElem.sets.push(setName);
+          }
         } else {
-          console.log(`No existing position found within tolerance for pos: ${pos}. Creating new set:`, setName);
           elems.push({ name: pos.toString(), sets: [setName] });
         }
       }
