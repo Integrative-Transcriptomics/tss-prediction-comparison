@@ -6,7 +6,9 @@ import HeaderWithTooltip from './HeaderWithTooltip';
 import UpSetPlot from './UpSetPlot';
 import './Visualization.css';
 
+// The Visualization component is the main component for visualizing TSS data, including tables, charts, and plots.
 function Visualization() {
+  // Extract the conditionId from the URL parameters using useParams hook
   const { conditionId } = useParams();
   const [conditionName, setConditionName] = useState('');
   const [forwardCsvData, setForwardCsvData] = useState(null);
@@ -19,7 +21,7 @@ function Visualization() {
   const [isCommonVisible, setIsCommonVisible] = useState(false);
 
   useEffect(() => {
-    // Fetch condition name
+    // Fetch the condition name based on the conditionId when the component mounts or conditionId changes
     const fetchConditionName = async () => {
       try {
         const response = await fetch(`/api/get_condition_name?condition=${conditionId}`);
@@ -35,6 +37,7 @@ function Visualization() {
   }, [conditionId]);
 
   useEffect(() => {
+    // Fetch the job IDs and associated CSV data for forward, reverse, and common TSS data
     const fetchJobIds = async () => {
       try {
         const response = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
@@ -49,6 +52,7 @@ function Visualization() {
       }
     };
 
+    // Fetch and set the CSV data for a given job ID
     const fetchCsvData = async (jobId, setCsvData) => {
       try {
         const response = await fetch(`/api/get_tss?jobid=${jobId}`);
@@ -63,6 +67,7 @@ function Visualization() {
       }
     };
 
+    // Fetch and set the common CSV data for the given condition
     const fetchCommonCsvData = async (conditionId) => {
       try {
         const response = await fetch(`/api/get_common?condition=${conditionId}`);
@@ -80,6 +85,7 @@ function Visualization() {
     fetchJobIds();
   }, [conditionId]);
 
+  // Function to parse CSV data into an array of objects
   const parseCsv = (csvText) => {
     const lines = csvText.split('\n').filter(line => line.trim() !== '');
     const headers = lines[0].split(',');
@@ -92,15 +98,17 @@ function Visualization() {
     });
   };
 
+  // Parse the CSV data if it exists
   const forwardParsedData = forwardCsvData ? parseCsv(forwardCsvData) : [];
   const reverseParsedData = reverseCsvData ? parseCsv(reverseCsvData) : [];
   const commonParsedData = commonCsvData ? parseCsv(commonCsvData) : [];
 
+  // Function to render a data table component with visibility toggling
   const renderDataTable = (data, title, isVisible, toggleVisibility, key) => {
     if (data.length > 0) {
       return (
         <DataTable 
-          key={key}  // Füge die key-Eigenschaft hinzu
+          key={key}  // Key is required for lists in React to maintain unique identity
           data={data} 
           title={title} 
           isVisible={isVisible} 
@@ -111,6 +119,7 @@ function Visualization() {
     return null;
   };
 
+  // Table configuration for the different data types
   const tables = [
     { data: forwardParsedData, title: 'Forward Job Data', isVisible: isForwardVisible, toggleVisibility: () => setIsForwardVisible(!isForwardVisible) },
     { data: reverseParsedData, title: 'Reverse Job Data', isVisible: isReverseVisible, toggleVisibility: () => setIsReverseVisible(!isReverseVisible) },
@@ -126,6 +135,7 @@ function Visualization() {
         <h1>Visualization Page</h1>
         <p>This is the visualization content for Condition: {conditionName}</p>
 
+        {/* Render the TSS Distribution Chart with a header and tooltip */}
         <HeaderWithTooltip 
           title="Distribution of TSS Types Across Genes"
           tooltipText="This bar plot shows the distribution of different TSS types across various genes.
@@ -135,10 +145,12 @@ function Visualization() {
 
         <TSSDistributionChart forwardCsvData={forwardCsvData} reverseCsvData={reverseCsvData} />
 
+        {/* Render each of the tables for forward, reverse, and common data */}
         {tables.map(({ data, title, isVisible, toggleVisibility }, index) => 
           renderDataTable(data, title, isVisible, toggleVisibility, index)
         )}
 
+        {/* Render the UpSet plot with a header and tooltip */}
         <HeaderWithTooltip 
           title="TSS Intersection Analysis"
           tooltipText="This UpSet plot visualizes the overlaps of TSSs across different categories, showing how many TSSs are present in various combinations of these categories.

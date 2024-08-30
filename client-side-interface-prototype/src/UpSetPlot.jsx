@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import UpSetJS, { extractCombinations } from '@upsetjs/react';
 
+// The UpSetPlot component visualizes intersections of TSS data using the UpSet.js library.
 const UpSetPlot = ({ conditionId }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,6 +9,7 @@ const UpSetPlot = ({ conditionId }) => {
   const [selection, setSelection] = useState(null);
 
   useEffect(() => {
+    // Fetch TSS data for the specified condition ID when the component mounts or the condition ID changes
     const fetchData = async () => {
       try {
         console.log("Fetching data for conditionId:", conditionId);
@@ -36,6 +38,7 @@ const UpSetPlot = ({ conditionId }) => {
     fetchData();
   }, [conditionId]);
 
+  // Function to parse the CSV text into an array of objects
   const parseCsv = (csvText) => {
     const lines = csvText.split('\n').filter(line => line.trim() !== '');
     const headers = lines[0].split(',').map(header => header.trim());
@@ -53,6 +56,7 @@ const UpSetPlot = ({ conditionId }) => {
     return parsedData;
   };
 
+  // Function to process parsed data into a format suitable for UpSet.js
   const processUpSetData = (parsedData) => {
     const elems = [];
     const tssTypes = ['pTSS/sTSS', 'asTSS', 'iTSS', 'orphan'];
