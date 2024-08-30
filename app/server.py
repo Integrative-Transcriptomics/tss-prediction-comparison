@@ -111,7 +111,6 @@ def upload_file():
                     condition_names[condition] = request.form.get(key)
 
         for key in request.files:
-            print(key)
             if key.startswith("condition_"):
                 condition = key.split("condition_")[1].split("_")[0]
 
@@ -163,7 +162,6 @@ def upload_file():
 
             # creating Job
             cond_name = condition_names[condition]
-            print(cond_name + "----------------") # debug line
             job = JobObject(filepaths=[path], name=file_name, condition_name=cond_name, master_table_path=master_table_path, gff_path=gff_path, is_reverse_strand=False)
             jobRegistry[job.id] = job
             jobQueue.put(job)
@@ -201,11 +199,9 @@ def upload_file():
 
         # creating ProjectObject
         project_object = ProjectObject(project_name=project_name, condition_dict=conditionRegistry)
+
         # adding ProjectObject to projectRegistry
         projectRegistry[project_object.id] = project_object
-
-        print(condition_json)
-        print(conditionRegistry)
 
         response_json = {}
         response_json["Project_id"] = project_object.id
@@ -219,7 +215,6 @@ def upload_file():
 def get_upsetplot():
     if(request.method == "GET"):
         condition_id = request.args.get("condition", type=str)
-        print(condition_id)
         condition = get_condition_by_id(condition_id)
 
         if condition:

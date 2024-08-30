@@ -120,12 +120,3 @@ def __delete_unwanted_columns(data_frame, wanted_columns):
         else:
             data_frame = data_frame.drop(columns=[col])
     return data_frame
-
-'''
-# example output for testfile:
-file_path = "../tests/test_files/MasterTable.tsv"
-dfs = parse_master_table(file_path)
-for condition in dfs.keys():
-    print("condition: " + condition + "\n")
-    print(dfs.get(condition))
-    print("\n")'''

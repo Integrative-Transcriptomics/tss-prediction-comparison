@@ -78,12 +78,9 @@ class JobObject:
         self.processedDF = median_df
         tss_list, confidence_list = tss_predictor_sklearn(dataframe_to_predict)
 
-        print(tss_list, confidence_list)
-
         if (not (self.gff_path is None)):
             gff_df = ps.parse_gff_to_df(self.gff_path)
             self.classified_tss = cs.classify(gff_df, tss_list, confidence_list, self.is_reverse_strand)
-            print(self.classified_tss)
 
         try:
             self.common_tss = self.__compute_common_tss()
@@ -107,6 +104,5 @@ class JobObject:
                     "condition_name of JobObject: " + self.condition_name + " does not exist in provided MasterTable") from e
             else:
                 common_tss = cs.find_common_tss(self.classified_tss, self.master_table, self.is_reverse_strand)
-                print("common TSS for: " + self.condition_name)
-                print(common_tss)
+
                 return common_tss
