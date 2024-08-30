@@ -50,24 +50,29 @@ function JobManagement() {
   // State to manage the feedback message displayed while downloading.
   const [feedbackMessage, setFeedbackMessage] = useState('');
 
+  // Fetch data from the server when the page loads.
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch all projects that are currently in the database
         const projectResponse = await fetch('/api/get_project_list');
+        // Check if the response is ok and throw an error if it is not
         if (!projectResponse.ok) {
           throw new Error('Failed to fetch project list.');
         }
         const projectData = await projectResponse.json();
+        // Set the projects state to the project data
         setProjects(Object.entries(projectData));
 
         // Fetch conditions for each project
         const conditions = {};
+        // Loop through each project and fetch the conditions for each project
         for (const [projectId] of Object.entries(projectData)) {
           const conditionsResponse = await fetch(`/api/get_conditions?project_id=${projectId}`);
           if (!conditionsResponse.ok) {
             throw new Error(`Failed to fetch conditions for project ${projectId}.`);
           }
+          // Set the conditions state to the conditions data
           const conditionsData = await conditionsResponse.json();
           conditions[projectId] = Object.entries(conditionsData);
         }
@@ -76,15 +81,18 @@ function JobManagement() {
         // Fetch job IDs and statuses for each condition
         const jobs = {};
         const statuses = {};
+        // Loop through each project and fetch the job IDs and statuses for each condition
         for (const projectId in conditions) {
           for (const [, conditionId] of conditions[projectId]) {
             const jobIdsResponse = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
             if (!jobIdsResponse.ok) {
               throw new Error(`Failed to fetch job IDs for condition ${conditionId}.`);
             }
+            // Set the jobs state to the job IDs data
             const jobIdsData = await jobIdsResponse.json();
             jobs[conditionId] = jobIdsData;
 
+            // Fetch the status of each job
             const forwardStatusResponse = await fetch(`/api/get_state?jobid=${jobIdsData.forward}`);
             const reverseStatusResponse = await fetch(`/api/get_state?jobid=${jobIdsData.reverse}`);
             if (forwardStatusResponse.ok && reverseStatusResponse.ok) {
@@ -97,6 +105,7 @@ function JobManagement() {
             }
           }
         }
+        // Set the jobStatuses state to the statuses data
         setConditionsJobs(jobs);
         setJobStatuses(statuses);
       } catch (error) {
@@ -109,6 +118,7 @@ function JobManagement() {
 
   // Function to render the status of a job
   const renderStatus = (status) => {
+    // Return different colors based on the status of the job
     switch (status) {
       case 'Not started':
         return <span style={{ color: 'gray' }}>Not started</span>;
@@ -123,16 +133,19 @@ function JobManagement() {
     }
   };
 
+  // Function to check if a condition is finished
   const isConditionFinished = (conditionId) => {
     const jobIds = conditionsJobs[conditionId];
     return jobIds && jobStatuses[jobIds.forward] === 'Finished' && jobStatuses[jobIds.reverse] === 'Finished';
   }
 
+  // Function to check if a project is finished
   const isProjectFinished = (projectId) => {
     const conditions = projectConditions[projectId];
     return conditions && conditions.every(([, conditionId]) => isConditionFinished(conditionId));
   };
 
+  // Function to handle viewing a condition
   const handleViewCondition = (conditionId) => {
     // Navigate to the visualization page for the selected condition
     navigate(`/visualization/${conditionId}`);
@@ -143,6 +156,7 @@ function JobManagement() {
     window.location.reload();
   }
 
+  // Function to handle downloading project data
   const handleDownloadProject = async (projectId) => {
     try {
         // Set loading state and feedback message
@@ -153,11 +167,14 @@ function JobManagement() {
         if (!response.ok) {
             throw new Error('Failed to download project.');
         }
+        // Convert the response to a blob and create a URL for downloading
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
+        // Set the download attribute to the project ID
         a.download = `${projectId}.zip`;
+        // Append the anchor element to the body and click it to start the download
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -176,7 +193,7 @@ function JobManagement() {
  // Component for rendering individual job status
  const JobStatus = ({ jobId, status }) => (
    <div>
-    J ob ID: {jobId}, Status: {renderStatus(status)}
+    Job ID: {jobId}, Status: {renderStatus(status)}
     </div>
   );
 
