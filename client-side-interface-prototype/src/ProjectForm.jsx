@@ -1,267 +1,144 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Condition from './Condition';
+import ConditionList from './ConditionList';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
+import Feedback from './Feedback'; // Neue zusammengefasste Komponente
 
-// The main functional component for the project form.
 function ProjectForm() {
-  // State for managing the project name input.
   const [projectName, setProjectName] = useState('');
-  
-  // State for managing the list of conditions. Each condition has a name, a unique id and a reference for handling file uploads.
   const [conditions, setConditions] = useState([{ id: 1, ref: React.createRef(), name: "" }]);
-  
-  // Reference for the GFF component to access its file state.
   const gffRef = useRef(null);
-  
-  // Reference for the TSS Master Table component to access its file state.
   const tssMasterTableRef = useRef(null);
-
-  // Use the useNavigate hook to navigate to a different page.
   const navigate = useNavigate();
-
-  // State to manage the feedback message displayed after submitting.
   const [feedbackMessage, setFeedbackMessage] = useState('');
-
-  // State to manage the error message displayed if no project name was given
   const [errorMessage, setErrorMessage] = useState('');
-
-  // State to track the previous project name for preventing re-upload with the same name.
   const [previousProjectName, setPreviousProjectName] = useState('');
-
-  // State to track if the file upload is complete.
   const [isUploadComplete, setIsUploadComplete] = useState(true);
 
-  // Function to add a new condition to the list. It creates a new condition with a name, a unique id and a reference.
-  const addCondition = () => {
-    const index = conditions.length + 1;
-    // back-ticks not single quotes for variables inside strings
-    setConditions([...conditions, { id: index, ref: React.createRef(), name: "" }]);
-  };
+  const handleProjectNameChange = (e) => setProjectName(e.target.value);
 
-  // Function for updating the condition name given the chosen conditions id and the new chosen name
-  const updateConditionName = (id, newName) => {
-    // declare new conditions array so that the state isnt directly mutated and map over the current conditions
-    const updatedConditions = conditions.map(
-      condition => {
-        if(id === condition.id) {
-          // update the name of the current condition 
-          return {...condition, name: newName};
-        }
-        // dont change the unaffected conditions
-        return condition;
-      }
-    )
-    setConditions(updatedConditions);
-  }
-  // Function to remove the last condition from the list. Ensures there is at least one condition left.
-  const deleteCondition = () => {
-    if (conditions.length > 1) {
-      const newConditions = [...conditions];
-      newConditions.pop();
-      setConditions(newConditions);
-    }
-  };
-
-  // Function to handle changes to the project name input field.
-  const handleProjectNameChange = (e) => {
-    setProjectName(e.target.value);
-  };
-
-  // Function to handle form submission and upload files to the server.
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevents the default form submission behavior.
-
-    // clear previous error messages
+    e.preventDefault();
     setErrorMessage('');
-
-    // Set the feedback message
     setFeedbackMessage('');
 
-    // Error message if project name is empty
-    if (!projectName.trim()) {
-      setErrorMessage('Project Name cannot be empty.');
-      return
-    }
+    if (!validateForm()) return;
 
-    if (projectName === previousProjectName) {
-      setErrorMessage('The Project Name cannot be uploaded twice.');
-      return;
-    }
-    
-    // Check for matching forward and reverse file counts
-    for (const condition of conditions) {
-      const conditionRef = condition.ref.current;
-      if (conditionRef) {
-         // Check if the number of forward and reverse files are equal
-        if (conditionRef.forwardFiles.length !== conditionRef.reverseFiles.length) {
-          setErrorMessage(`The number of forward and reverse files for ${condition.name} do not match.`);
-          return;
-        }
-          
-        // Check if there are any files uploaded for this condition
-        if (conditionRef.forwardFiles.length === 0 && conditionRef.reverseFiles.length === 0) {
-           setErrorMessage(`No files uploaded for Condition ${condition.id}.`);
-           return;
-        }
-      }
-    }
-    
-    // Error message if any condition name is empty
-    for (const condition of conditions) {
-      if (!condition.name.trim()) {
-          setErrorMessage(`Condition ${condition.id} name cannot be empty.`);
-          return;
-      }
-    }
-
-    // Error message if user didnt provide tss mastertable
-    if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) { 
-      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
-      return;
-    }
-
-    // Error message if user didnt provide gff file
-    if (!gffRef.current || !gffRef.current.file) {
-      setErrorMessage('Please upload a GFF file for the TSS classification.');
-      return;
-    }
-
-
-    // Create a FormData object to send files and data via a multipart/form-data request.
-    const formData = new FormData();
-
-    // Append the name of the project to the FormData object.
-      formData.append('projectName', projectName);
-    
-    // Append the GFF file to the FormData object.
-      formData.append('gff', gffRef.current.file, 'gff-file.gff');
-
-    // Append the TSS Master Table file to the FormData object.
-      formData.append('master_table', tssMasterTableRef.current.file, 'master-table.tsv');
-
-    // Append the forward and reverse files for each condition to the FormData object.
-    conditions.forEach((condition, index) => {
-      const conditionRef = condition.ref.current;
-      if (conditionRef) {
-        conditionRef.forwardFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
-          formData.append(`condition_${index + 1}_forward_${idx + 1}_name`, condition.name);
-        });
-        conditionRef.reverseFiles.forEach((file, idx) => {
-          formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
-          formData.append(`condition_${index + 1}_reverse_${idx + 1}_name`, condition.name);
-
-        });
-      }
-    });
-
+    const formData = createFormData();
     try {
-
       setIsUploadComplete(false);
-
-      // Indicate that the files are being uploaded.
       setFeedbackMessage('Files are currently uploading, please wait a few seconds...');
 
-      // Send the FormData object to the backend using a POST request.
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch('/api/upload', { method: 'POST', body: formData });
 
-      // Check if the response is successful.
       if (response.ok) {
-        const result = await response.json();
-
-        // If the server sends a success message, set the feedback message.
-        console.log('Files successfully uploaded');
-        setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
-
-        // Update previous project name to current project name after successful upload
         setPreviousProjectName(projectName);
-
+        setFeedbackMessage('Files successfully uploaded, please load the Project-Manager');
       } else {
         console.error('File upload failed');
       }
     } catch (error) {
       console.error('Error uploading files:', error);
     } finally {
-      setIsUploadComplete(true); // Indicate that the file upload is complete.
+      setIsUploadComplete(true);
+    }
   };
-};
 
-  const handleLoadJobManagement = () => {
-    // Navigate to the Job Management page using the navigate function from the useNavigate hook.
-    navigate('/job-management');
+  const validateForm = () => {
+    if (!projectName.trim()) {
+      setErrorMessage('Project Name cannot be empty.');
+      return false;
+    }
+    if (projectName === previousProjectName) {
+      setErrorMessage('The Project Name cannot be uploaded twice.');
+      return false;
+    }
+    if (!validateConditions()) return false;
+    if (!validateFiles()) return false;
+    return true;
   };
+
+  const validateConditions = () => {
+    for (const condition of conditions) {
+      const conditionRef = condition.ref.current;
+      if (!condition.name.trim()) {
+        setErrorMessage(`Condition ${condition.id} name cannot be empty.`);
+        return false;
+      }
+      if (!conditionRef || conditionRef.forwardFiles.length === 0 || conditionRef.reverseFiles.length === 0) {
+        setErrorMessage(`No files uploaded for Condition ${condition.id}.`);
+        return false;
+      }
+      if (conditionRef.forwardFiles.length !== conditionRef.reverseFiles.length) {
+        setErrorMessage(`The number of forward and reverse files for ${condition.name} do not match.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateFiles = () => {
+    if (!tssMasterTableRef.current || !tssMasterTableRef.current.file) {
+      setErrorMessage('Please upload a master table from TSSpredator for the comparison.');
+      return false;
+    }
+    if (!gffRef.current || !gffRef.current.file) {
+      setErrorMessage('Please upload a GFF file for the TSS classification.');
+      return false;
+    }
+    return true;
+  };
+
+  const createFormData = () => {
+    const formData = new FormData();
+    formData.append('projectName', projectName);
+    formData.append('gff', gffRef.current.file, 'gff-file.gff');
+    formData.append('master_table', tssMasterTableRef.current.file, 'master-table.tsv');
+    conditions.forEach((condition, index) => {
+      const conditionRef = condition.ref.current;
+      if (conditionRef) {
+        appendConditionFiles(formData, conditionRef, condition.name, index);
+      }
+    });
+    return formData;
+  };
+
+  const appendConditionFiles = (formData, conditionRef, conditionName, index) => {
+    conditionRef.forwardFiles.forEach((file, idx) => {
+      formData.append(`condition_${index + 1}_forward_${idx + 1}`, file, file.name);
+      formData.append(`condition_${index + 1}_forward_${idx + 1}_name`, conditionName);
+    });
+    conditionRef.reverseFiles.forEach((file, idx) => {
+      formData.append(`condition_${index + 1}_reverse_${idx + 1}`, file, file.name);
+      formData.append(`condition_${index + 1}_reverse_${idx + 1}_name`, conditionName);
+    });
+  };
+
+  const handleLoadJobManagement = () => navigate('/job-management');
 
   return (
     <div className="project-form">
       <h1>TSSplorer</h1>
-      <p className="subheading"> TSS prediction and comparison Tool</p>
+      <p className="subheading">TSS prediction and comparison Tool</p>
       
-      {/* Project Name Input */}
       <div className="form-group">
         <label>Project Name:</label>
-        <input
-          type="text"
-          value={projectName}
-          onChange={handleProjectNameChange}
-          placeholder="Your Project name"
-        />
+        <input type="text" value={projectName} onChange={handleProjectNameChange} placeholder="Your Project name" />
       </div>
-      
-      {/* Condition File Upload Section */}
-      <div className="form-group">
-        <label>Data Upload:</label>
-        
-        {/* Render each Condition component and its corresponding input field */}
-        {conditions.map(
-          (condition) =>
-            <div className="condition-input-group" key = {condition.id}>
-              <Condition key={condition.id} id={condition.id} ref={condition.ref} name ={condition.name}/>
-              <input 
-                type = "text"  
-                onChange={(e) => updateConditionName(condition.id, e.target.value)}
-                placeholder={`Name of Condition ${condition.id} (has to match the corresponding condition in the mastertable)`} 
-              >
-              </input>
-            </div>
-          )
-        }
 
-        {/* Buttons to add or remove conditions */}
-        <button className="button" onClick={addCondition}>+</button>
-        <button className="button" onClick={deleteCondition}>-</button>
+      <ConditionList conditions={conditions} setConditions={setConditions} />
+
+      <TssMasterTable ref={tssMasterTableRef} />
+      <GFF ref={gffRef} />
+
+      <div className='buttons-container'>
+        <button className="start-button" onClick={handleSubmit} disabled={!isUploadComplete}>Start TSS Prediction</button>
+        <button className="load-job-button" onClick={handleLoadJobManagement}>Load Project-Manager</button>
       </div>
-      
-      {/* TSS Master Table File Upload */}
-      <div>
-        <TssMasterTable ref={tssMasterTableRef} />
-      </div>
-      
-      {/* GFF File Upload */}
-      <div>
-        <GFF ref={gffRef} />
-      </div>
-      
-      {/* Buttons Container */}
-      <div className='buttons-container'> 
-      {/* Submit Button */}
-      <button className="start-button" 
-      onClick={handleSubmit}
-      disabled={!isUploadComplete}
-      >Start TSS Prediction
-      </button>
-      {/* Job Management Page Button */}
-      <button className="load-job-button" onClick={handleLoadJobManagement}>Load Project-Manager</button>
+
+      <Feedback errorMessage={errorMessage} feedbackMessage={feedbackMessage} />
     </div>
-    {/* Feedback Message */}
-    {feedbackMessage && <div className="feedback-message">{feedbackMessage}</div>}
-    {/* Error message: Project Name cannot be empty*/}
-    {errorMessage && <div className="error-message">{errorMessage} </div>}
-  </div>
   );
 }
 
