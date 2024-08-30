@@ -30,6 +30,7 @@ function Visualization() {
         setLoading(false);
       }
     };
+
     const fetchCsvData = async (jobId, setCsvData) => {
       try {
         const response = await fetch(`/api/get_tss?jobid=${jobId}`);
@@ -38,10 +39,12 @@ function Visualization() {
         setCsvData(data);
       } catch (error) {
         setError(error.message);
+        setCsvData('');  // Set an empty string or default data to avoid map() errors
       } finally {
         setLoading(false);
       }
     };
+
     const fetchCommonCsvData = async (jobId) => {
       try {
         const response = await fetch(`/api/get_common?jobid=${jobId}`);
@@ -50,10 +53,12 @@ function Visualization() {
         setCommonCsvData(data);
       } catch (error) {
         setError(error.message);
+        setCommonCsvData('');  // Set an empty string or default data to avoid map() errors
       } finally {
         setLoading(false);
       }
     };
+
     fetchJobIds();
   }, [conditionId]);
 
@@ -74,6 +79,12 @@ function Visualization() {
       };
       const forwardParsedData = forwardCsvData ? parseCsv(forwardCsvData) : [];
       const reverseParsedData = reverseCsvData ? parseCsv(reverseCsvData) : [];
+
+      if (forwardParsedData.length === 0 || reverseParsedData.length === 0) {
+        console.error('Parsed data is empty. Please check the CSV content.');
+        return;
+      }
+
       const processData = (parsedData) => {
         const fileData = {};
         parsedData.forEach(row => {
@@ -88,19 +99,8 @@ function Visualization() {
       const forwardData = processData(forwardParsedData);
       const reverseData = processData(reverseParsedData);
 
-      // Get all gene names and sort them to ensure consistent order
-      const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)]));
-
-      // Sort genes by total count (descending) and take the top 10
-      const topGeneNames = fileNames
-        .map(fileName => {
-          const totalCount = Object.values(forwardData[fileName] || {}).reduce((sum, count) => sum + count, 0)
-            + Object.values(reverseData[fileName] || {}).reduce((sum, count) => sum + count, 0);
-          return { fileName, totalCount };
-        })
-        .sort((a, b) => b.totalCount - a.totalCount)
-        .slice(0, 10)
-        .map(item => item.fileName);
+      // Get all gene names, sort them alphabetically
+      const fileNames = Array.from(new Set([...Object.keys(forwardData), ...Object.keys(reverseData)])).sort((a, b) => a.localeCompare(b));
 
       const tssTypes = Array.from(new Set([...forwardParsedData.map(row => row['TSS type']), ...reverseParsedData.map(row => row['TSS type'])]));
       const seriesData = tssTypes.map(tssType => {
@@ -110,7 +110,7 @@ function Visualization() {
           stack: 'total',
           label: { show: true },
           emphasis: { focus: 'series' },
-          data: topGeneNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
+          data: fileNames.map(fileName => (forwardData[fileName]?.[tssType] || 0) + (reverseData[fileName]?.[tssType] || 0))
         };
       });
       const option = {
@@ -118,7 +118,21 @@ function Visualization() {
         legend: {},
         grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
         xAxis: { type: 'value' },
-        yAxis: { type: 'category', data: topGeneNames },
+        yAxis: {
+          type: 'category',
+          data: fileNames,
+          axisLabel: {
+            interval: 0, // Show all labels
+            rotate: 45 // Optional: rotate labels for better readability
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          yAxisIndex: 0,
+          filterMode: 'empty',
+          start: 0,
+          end: Math.min(100, 10 * (10 / fileNames.length)) // Adjust scroll based on the number of items
+        }],
         series: seriesData
       };
       myChart.setOption(option);
@@ -181,13 +195,41 @@ function Visualization() {
         <h1>Visualization Page</h1>
         <p>This is the visualization content for Condition ID: {conditionId}</p>
         
-        <div id="echarts" style={{ width: '160%', height: '600px' }}></div>
+        <div className="header-with-tooltip">
+          <h2 style={{ display: 'inline-block', marginRight: '10px' }}>
+            Distribution of TSS Types Across Genes
+          </h2>
+          <div className="tooltip">
+            <span className="tooltip-icon">?</span>
+            <span className="tooltip-text">
+              This bar plot shows the distribution of different TSS types across various genes.
+              You can use the two sliders to view an interval of genes of your choice.
+              By clicking on the buttons of the different TSS types, you can switch their display off and on.
+            </span>
+          </div>
+        </div>
+  
+        <div id="echarts" style={{ width: '160%', height: '600px', overflowY: 'auto' }}></div>
   
         {forwardParsedData.length > 0 && renderTable(forwardParsedData, 'Forward Job Data', isForwardVisible, () => setIsForwardVisible(!isForwardVisible))}
         {reverseParsedData.length > 0 && renderTable(reverseParsedData, 'Reverse Job Data', isReverseVisible, () => setIsReverseVisible(!isReverseVisible))}
         {commonParsedData.length > 0 && renderTable(commonParsedData, 'Common TSS Data', isCommonVisible, () => setIsCommonVisible(!isCommonVisible))}
-        
-        <UpSetPlot conditionId={conditionId} /> {/* Add UpSetPlot component here */}
+  
+        <div className="header-with-tooltip">
+          <h2 style={{ display: 'inline-block', marginRight: '10px' }}>
+            TSS Intersection Analysis
+          </h2>
+          <div className="tooltip">
+            <span className="tooltip-icon">?</span>
+            <span className="tooltip-text">
+              This UpSet plot visualizes the overlaps of TSSs across different categories, showing how many TSSs are present in various combinations of these categories.
+              The vertical bars at the top represent the size of these overlaps, while the horizontal bars indicate the total number of TSSs in each category.
+              We do not compare the exact TSS position but if the the positions have a distance of max. five positions up- or downstream. 
+            </span>
+          </div>
+        </div>
+  
+        <UpSetPlot conditionId={conditionId} />
       </div>
     </div>
   );
