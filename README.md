@@ -39,7 +39,19 @@ After a successful setup of the backend and frontend the full server can be laun
 Remember that you're not limited to uploading just one project. Head back to the initial page and upload another project, the management page will show all projects that you have submitted while on the TSSplorer website. 
  
 ## Workflow
-Workflow will be added shortly.
+
+With given Input:
+
+- Conditions with forward and reverse files, Master-Table and GFF-file
+ 
+a prediction of possible TSS together with a confidence value are computed for each condition.  
+TSS of forward and reverse files of a condition are predicted seperately but joined in the end.
+
+1. technical replicates are merged together (f.e. multiple multiple forward files)
+2. TSS are predicted using a Random Forets Classifier based on "scikit learn"
+3. Classification of TSS is done with the GFF-file (classes are f.e. primary or secondary TSS)
+4. finding Common TSS of our predicted TSS and TSS of MasterTable (TSS of the MasterTable are the TSS of TSSpredator)
+5. common TSS of prediction for forward files and reverse files are joined and visualized in front end
 
 ## Languages and tools used in this project
 - Visualization: 
