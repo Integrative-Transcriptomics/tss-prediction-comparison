@@ -374,11 +374,11 @@ def get_combined_tss_by_id():
 @app.route("/api/get_common", methods=["GET"])
 def get_common_by_id():
     if request.method == 'GET':
-        id = request.args.get('jobid', type=str)
-        job = get_job_by_id(id)
-        if job:
+        id = request.args.get('condition', type=str)
+        condition = get_condition_by_id(id)
+        if condition:
             try:
-                common_df = job.get_file(returnType.COMMON)
+                common_df = condition.get_combined_tss(jobRegistry)
                 response_object = df_to_response(common_df, "common_prediction.csv")
                 status_code = 200
             except NotReadyException as e:

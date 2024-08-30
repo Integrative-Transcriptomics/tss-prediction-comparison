@@ -25,6 +25,19 @@ class ConditionObject:
 
         return cleaned
 
+    def get_combined_common(self, jobRegistry):
+        forward_job = jobRegistry[self.forward_id]
+        backward_job = jobRegistry[self.backward_id]
+
+        tss_df_forward = forward_job.get_file(returnType.COMMON)
+        tss_df_reverse = backward_job.get_file(returnType.COMMON)
+
+        combined = pd.concat([tss_df_forward, tss_df_reverse])
+
+        cleaned = combined.drop_duplicates()
+
+        return cleaned
+
     def get_upsetplot_df(self, jobRegistry):
         forward_job = jobRegistry[self.forward_id]
         backward_job = jobRegistry[self.backward_id]
