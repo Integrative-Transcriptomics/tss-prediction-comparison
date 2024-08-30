@@ -5,133 +5,108 @@ const UpSetPlot = ({ conditionId }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selection, setSelection] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch job IDs based on condition ID
-        const jobIdsResponse = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
-        const jobIdsData = await jobIdsResponse.json();
-        const jobId = jobIdsData.forward; 
+        console.log("Fetching data for conditionId:", conditionId);
 
-        // Fetch combined TSS data
-        const combinedTssResponse = await fetch(`/api/get_combined_tss?condition=${conditionId}`);
-        const combinedTssCsvText = await combinedTssResponse.text();
-        const parsedTssData = parseCsv(combinedTssCsvText);
+        const response = await fetch(`/api/get_upsetplot?condition=${conditionId}`);
+        if (!response.ok) throw new Error('Failed to fetch UpSet plot data');
 
-        // Fetch master table data using the job ID
-        const masterTableResponse = await fetch(`/api/get_master_table?jobid=${jobId}`);
-        const masterTableCsvText = await masterTableResponse.text();
-        const parsedMasterTableData = parseCsv(masterTableCsvText);
+        const csvText = await response.text();
+        console.log("Fetched CSV text:", csvText.slice(0, 500));  // Only show the first 500 characters to avoid console clutter
 
-        // Process the data for UpSet plot
-        const upSetData = processUpSetData(parsedTssData, parsedMasterTableData);
+        const parsedData = parseCsv(csvText);
+        console.log("Parsed Data:", parsedData);
+
+        const upSetData = processUpSetData(parsedData);
+        console.log("Processed UpSet Data:", upSetData);
+
         setData(upSetData);
       } catch (error) {
+        console.error("Error fetching or processing data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    const parseCsv = (csvText) => {
-      const lines = csvText.split('\n').filter(line => line.trim() !== '');
-      const headers = lines[0].split(',').map(header => header.trim());
-      return lines.slice(1).map(line => {
-        const values = line.split(',').map(value => value.trim());
-        return headers.reduce((obj, header, index) => {
-          obj[header] = values[index];
-          return obj;
-        }, {});
-      });
-    };
-
-    const processUpSetData = (combinedTssData, masterTableData) => {
-      const tolerance = 5;
-      const aggregatedDataByPosition = new Map();
-
-      const findOrCreatePosition = (pos, tssType, source) => {
-        for (let [existingPos, data] of aggregatedDataByPosition.entries()) {
-          if (Math.abs(existingPos - pos) <= tolerance) {
-            data[source][tssType] = (data[source][tssType] || 0) + 1;
-            return;
-          }
-        }
-        aggregatedDataByPosition.set(pos, { master: {}, combined: {} });
-        aggregatedDataByPosition.get(pos)[source][tssType] = 1;
-      };
-
-      masterTableData.forEach(entry => {
-        let tssType = entry['TSS type'];
-        if (tssType === 'orphan') tssType = 'orph';
-        if (tssType === 'pTSS/sTSS') tssType = 'p/sTSS';
-        const pos = parseInt(entry.Pos, 10);
-        findOrCreatePosition(pos, tssType, 'master');
-      });
-
-      combinedTssData.forEach(entry => {
-        let tssType = entry['TSS type'];
-        if (tssType === 'orphan') tssType = 'orph';
-        if (tssType === 'pTSS/sTSS') tssType = 'p/sTSS';
-        const pos = parseInt(entry.Pos, 10);
-        findOrCreatePosition(pos, tssType, 'combined');
-      });
-
-      const upSetData = [];
-      const tssTypes = ['orph', 'asTSS', 'iTSS', 'p/sTSS'];
-
-      tssTypes.forEach(type => {
-        const masterKey = `${type} predator`;
-        const combinedKey = `${type} plorer`;
-
-        const masterCount = Array.from(aggregatedDataByPosition.values()).reduce((acc, val) => acc + (val.master[type] || 0), 0);
-        const combinedCount = Array.from(aggregatedDataByPosition.values()).reduce((acc, val) => acc + (val.combined[type] || 0), 0);
-
-        upSetData.push({
-          name: masterKey,
-          sets: [masterKey],
-          size: masterCount,
-        });
-
-        upSetData.push({
-          name: combinedKey,
-          sets: [combinedKey],
-          size: combinedCount,
-        });
-
-        const intersectionCount = Array.from(aggregatedDataByPosition.values()).reduce((acc, val) => {
-          return acc + Math.min(val.master[type] || 0, val.combined[type] || 0);
-        }, 0);
-
-        upSetData.push({
-          name: `${type} intersection`,
-          sets: [masterKey, combinedKey],
-          size: intersectionCount,
-        });
-      });
-
-      return upSetData;
-    };
-
     fetchData();
   }, [conditionId]);
+
+  const parseCsv = (csvText) => {
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
+    const headers = lines[0].split(',').map(header => header.trim());
+    console.log("CSV Headers:", headers);
+
+    const parsedData = lines.slice(1).map(line => {
+      const values = line.split(',').map(value => value.trim());
+      return headers.reduce((obj, header, index) => {
+        obj[header] = values[index];
+        return obj;
+      }, {});
+    });
+
+    console.log("Parsed CSV data array:", parsedData);
+    return parsedData;
+  };
+
+  const processUpSetData = (parsedData) => {
+    const elems = [];
+    const tssTypes = ['pTSS/sTSS', 'asTSS', 'iTSS', 'orphan'];
+    const tolerance = 5;
+
+    parsedData.forEach(row => {
+      const pos = parseInt(row['Pos']);
+      const type = row['TSS type'];
+      const origin = row['origin'];
+
+      const setName = origin === '0' ? `Tool_${type}` : origin === '1' ? `TSSpredator_${type}` : null;
+
+      if (setName) {
+        let existingElem = elems.find(elem => Math.abs(parseInt(elem.name) - pos) <= tolerance);
+        
+        if (existingElem) {
+          console.log(`Existing position found within tolerance for pos: ${pos}. Adding to set:`, setName);
+          existingElem.sets.push(setName);
+        } else {
+          console.log(`No existing position found within tolerance for pos: ${pos}. Creating new set:`, setName);
+          elems.push({ name: pos.toString(), sets: [setName] });
+        }
+      }
+    });
+
+    console.log("Final UpSet Data (Elems):", elems);
+    return elems;
+  };
+
+  const onHover = (set) => {
+    console.log("Hovered on set:", set);
+    setSelection(set);
+  };
 
   if (loading) return <div>Loading UpSet Plot...</div>;
   if (error) return <div>Error: {error}</div>;
 
   const { sets, combinations } = extractCombinations(data);
+  console.log("Extracted Sets Structure:", sets);
+  console.log("Extracted Combinations Structure:", combinations);
 
   return (
     <div>
       <UpSetJS
         sets={sets}
         combinations={combinations}
-        width={1000}  // Set the width of the plot
-        height={600}  // Set the height of the plot
+        width={1000}
+        height={600}
+        selection={selection}
+        onHover={onHover}
         options={{
           labels: {
-            rotation: 0,  // No rotation
-            fontSize: 12,  // Adjust font size if necessary
+            rotation: 0,
+            fontSize: 12,
           },
         }}
       />
