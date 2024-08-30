@@ -6,6 +6,7 @@ import './Visualization.css';
 
 function Visualization() {
   const { conditionId } = useParams();
+  const [conditionName, setConditionName] = useState(''); // State for condition name
   const [jobIds, setJobIds] = useState(null);
   const [forwardCsvData, setForwardCsvData] = useState(null);
   const [reverseCsvData, setReverseCsvData] = useState(null);
@@ -17,6 +18,22 @@ function Visualization() {
   const [isCommonVisible, setIsCommonVisible] = useState(false);
 
   useEffect(() => {
+    // Fetch condition name
+    const fetchConditionName = async () => {
+      try {
+        const response = await fetch(`/api/get_condition_name?condition=${conditionId}`);
+        if (!response.ok) throw new Error('Failed to fetch condition name');
+        const data = await response.json();
+        setConditionName(data.Name); // Set condition name
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchConditionName();
+  }, [conditionId]);
+
+  useEffect(() => {
     const fetchJobIds = async () => {
       try {
         const response = await fetch(`/api/get_jobids?condition_id=${conditionId}`);
@@ -24,7 +41,7 @@ function Visualization() {
         const data = await response.json();
         fetchCsvData(data.forward, setForwardCsvData);
         fetchCsvData(data.reverse, setReverseCsvData);
-        fetchCommonCsvData(data.forward); // Assuming common TSS is related to forward job ID
+        fetchCommonCsvData(conditionId); // Fetch common TSS data using the condition ID
       } catch (error) {
         setError(error.message);
         setLoading(false);
@@ -45,9 +62,9 @@ function Visualization() {
       }
     };
 
-    const fetchCommonCsvData = async (jobId) => {
+    const fetchCommonCsvData = async (conditionId) => {
       try {
-        const response = await fetch(`/api/get_common?jobid=${jobId}`);
+        const response = await fetch(`/api/get_common?condition=${conditionId}`);
         if (!response.ok) throw new Error('Failed to fetch common TSS data');
         const data = await response.text();
         setCommonCsvData(data);
@@ -193,7 +210,7 @@ function Visualization() {
     <div className="visualization-container">
       <div className="visualization-content">
         <h1>Visualization Page</h1>
-        <p>This is the visualization content for Condition ID: {conditionId}</p>
+        <p>This is the visualization content for Condition: {conditionName}</p> {/* Display condition name instead of ID */}
         
         <div className="header-with-tooltip">
           <h2 style={{ display: 'inline-block', marginRight: '10px' }}>
