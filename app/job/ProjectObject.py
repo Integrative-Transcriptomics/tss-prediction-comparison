@@ -1,5 +1,6 @@
 import uuid
 
+
 class ProjectObject:
     def __init__(self, project_name, condition_dict):
         self.id = str(uuid.uuid4())

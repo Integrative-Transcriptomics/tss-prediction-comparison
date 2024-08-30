@@ -3,7 +3,6 @@ import pandas as pd
 import operator
 import numpy as np
 
-
 # this file contains a wiggle parser and useful mathematical methods for the work with wiggle files
 # we will parse the wiggle files to pandas DataFrames since working with these is a lot easier
 

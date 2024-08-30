@@ -8,13 +8,11 @@ from app.job.JobObject import returnType
 from app.job.JobExceptions import NotReadyException
 from app.job.ProjectObject import ProjectObject
 from app.job.ConditionObject import ConditionObject
-from json import loads, dumps
 import threading
 import queue
 import io
 import zipfile
 from io import BytesIO
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 dirname = os.path.dirname(__file__)
@@ -30,6 +28,7 @@ projectRegistry = {}
 jobThread = threading.Thread(target=job_processor, args=(jobQueue,))
 jobThread.daemon = True
 jobThread.start()
+
 
 # save file and return file name, extension and as the path it is stored at
 def save_file(file):
@@ -51,6 +50,7 @@ def get_job_by_id(id_):
     else:
         return None
 
+
 # returns projectObject if known to registry, otherwise returns None
 def get_project_by_id(id_):
     if id_ in projectRegistry:
@@ -58,12 +58,14 @@ def get_project_by_id(id_):
     else:
         return None
 
+
 # returns conditionObject if known to registry, otherwise returns None
 def get_condition_by_id(id_):
     for project_id in projectRegistry:
         if(id_ in projectRegistry[project_id].get_conditions().keys()):
             return projectRegistry[project_id].get_conditions()[id_]
     return None
+
 
 # turn dataframe into csv object for response endpoints
 def df_to_response(df, filename):
@@ -75,12 +77,14 @@ def df_to_response(df, filename):
 
     return response
 
+
 # turn df into bytes object
 def df_to_csv_bytes(df):
     buffer = io.StringIO()
     df.to_csv(buffer, index=False)
     buffer.seek(0)  # reset buffer
     return buffer
+
 
 # Upload endpoint. Checks uploaded file for wiggle file ending, stores file, creates job object and returns job id
 # upon sucess
@@ -169,7 +173,6 @@ def upload_file():
             condition_json[cond_name] = {"forward": job.id}
             condition_json[cond_name]["uuid"] = str(uuid.uuid4())
 
-
         # creating Job for each condition in conditions_reverse
         for condition in conditions_reverse:
             paths = []
@@ -211,6 +214,9 @@ def upload_file():
 
         return response_object, status_code
 
+
+# This endpoint gets all data needed to plot the Upsetplot at once.
+# Combines all TSS predictions and returns them in a frontend friendly CSV file.
 @app.route("/api/get_upsetplot", methods=["GET"])
 def get_upsetplot():
     if(request.method == "GET"):
@@ -346,7 +352,7 @@ def get_tss_by_id():
         return response_object, status_code
 
 
-# gets tss prediction by condition id. Fails if Job state is not finished.
+# gets combined forward and reverse prediction by condition id. Fails if Job state is not finished.
 @app.route("/api/get_combined_tss", methods=["GET"])
 def get_combined_tss_by_id():
     if request.method == 'GET':
@@ -365,7 +371,7 @@ def get_combined_tss_by_id():
             response_object = jsonify({"Error": "No file found with id: " + id})
         return response_object, status_code
 
-# gets tss comparison by id. Fails if Job state is not finished.
+# gets common tss by condition id. Fails if Job state is not finished.
 @app.route("/api/get_common", methods=["GET"])
 def get_common_by_id():
     if request.method == 'GET':
@@ -403,6 +409,8 @@ def get_master_by_id():
             response_object = jsonify({"Error": "No file found with id: " + id})
         return response_object, status_code
 
+
+# Maps condition name to id
 @app.route("/api/get_condition_name", methods=["GET"])
 def get_condition_name():
     if request.method == 'GET':
@@ -415,6 +423,7 @@ def get_condition_name():
             status_code = 404
             response_object = jsonify({"Error": "No file found with id: " + id})
         return response_object, status_code
+
 
 # gets ids and names of all known projects.
 @app.route("/api/get_project_list", methods=["GET"])
@@ -430,6 +439,7 @@ def get_project_list():
         response_object = jsonify(response_dict)
 
         return response_object, status_code
+
 
 # gets condition ids for a given projectid.
 @app.route("/api/get_conditions", methods=["GET"])
@@ -451,6 +461,7 @@ def get_conditions_list():
 
         return response_object, status_code
 
+
 # gets job ids for a given condition id.
 @app.route("/api/get_jobids", methods=["GET"])
 def get_jobids():
@@ -470,6 +481,7 @@ def get_jobids():
             response_object = jsonify({"Error": "No condition found with id: " + id})
 
         return response_object, status_code
+
 
 # gets gff file for a given job id.
 @app.route("/api/get_gff", methods=["GET"])

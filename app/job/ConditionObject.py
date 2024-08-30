@@ -2,6 +2,7 @@ import uuid
 from app.job.JobObject import returnType
 import pandas as pd
 
+
 class ConditionObject:
     def __init__(self, name, forward_id, backward_id):
         self.id = str(uuid.uuid4())
