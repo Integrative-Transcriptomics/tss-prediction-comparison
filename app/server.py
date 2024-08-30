@@ -408,6 +408,19 @@ def get_master_by_id():
             response_object = jsonify({"Error": "No file found with id: " + id})
         return response_object, status_code
 
+@app.route("/api/get_condition_name", methods=["GET"])
+def get_condition_name():
+    if request.method == 'GET':
+        id = request.args.get('condition', type=str)
+        condition = get_condition_by_id(id)
+        if condition:
+            status_code = 200
+            response_object = jsonify({"Name": str(condition.name)})
+        else:
+            status_code = 404
+            response_object = jsonify({"Error": "No file found with id: " + id})
+        return response_object, status_code
+
 # gets ids and names of all known projects.
 @app.route("/api/get_project_list", methods=["GET"])
 def get_project_list():
