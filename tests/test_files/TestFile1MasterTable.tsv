@@ -1,0 +1,5 @@
+﻿SuperPos	SuperStrand	mapCount	detCount	Condition	detected	enriched	stepHeight	repStepHeights	stepFactor	repStepFactors	enrichmentFactor	repEnrichmentFactors	classCount	Pos	Strand	Locus_tag	sRNA/asRNA	Product	UTRlength	GeneLength	Primary	Secondary	Internal	Antisense	AntisenseOrientation	Automated	Manual	Putative sRNA	Putative asRNA	Comment	Sequence -50 nt upstream + TSS (51nt)	contigPos	contigID
+10	+	2	2	infected	0	1	Apr-18	4.184/4.184	6	6.0/1.833	>100	Infinity/Infinity	1	10	+	orphan		orphan	NA	NA	0	0	0	0	NA	1	0	0	0		NA	10	NC_002516.2|NC_002516.2
+10	+	2	2	uninfected	0	1	17.18	10.584/17.175	Feb-82	2.5/2.818	>100	15.168/Infinity	1	10	+	orphan		orphan	NA	NA	0	0	0	0	NA	1	0	0	0		NA	10	NC_002516.2|NC_002516.2
+37	+	2	2	infected	1	1	24.27	14.224/24.265	Feb-71	1.944/2.706	>100	Infinity/49.1	1	1	+	orphan		orphan	NA	NA	0	0	0	0	NA	1	0	0	0		NA	37	NC_002516.2|NC_002516.2
+37	+	2	2	uninfected	1	1	19-Apr	19.403/0.0	Jan-54	1.537/0.0	19-Nov	19.112/0.0	1	2	+	PA0001		orphan	NA	NA	0	1	0	0	NA	1	0	0	0		NA	37	NC_002516.2|NC_002516.2

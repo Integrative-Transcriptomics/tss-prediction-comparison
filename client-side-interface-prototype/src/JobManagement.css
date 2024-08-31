@@ -1,0 +1,99 @@
+/* outer border of the management page*/
+.projects-container {
+  border: 2px solid #ccc;
+  padding: 100px;
+  padding-top: 6%;
+  border-radius: 40px;
+  width: 100%;
+  height: 100%;
+  margin-left: 80%;
+  margin-right: 80%;
+
+}
+/* inner borders of the management page*/
+.project-box {
+  border: 2px solid #ccc;
+  padding: 40px;
+  padding-left: 60px;
+  padding-right: 100px;
+  border-radius: 40px;
+  width: auto;  
+  margin: 10px auto;
+
+}
+
+.status-not-started {
+  color: gray;
+}
+  
+.status-finished {
+  color: green;
+}
+
+.status-failed {
+  color: red;
+}
+
+.refresh-button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.refresh-button:hover {
+  background-color: #1e7e34;
+}
+
+.download-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.download-button.finished {
+  background-color: #28a745;
+  color: white;
+}
+.download-button.finished:hover{
+  background-color: #1e7e34;
+}
+
+.download-button.unfinished {
+  background-color: #f44336;
+  color: white;
+  cursor: not-allowed;
+}
+
+.view-condition-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.view-condition-button.finished {
+  background-color: #28a745;
+  color: white;
+}
+.view-condition-button.finished:hover {
+  background-color: #1e7e34;
+}
+
+.view-condition-button.unfinished {
+  background-color: #f44336;
+  color: white;
+  cursor: not-allowed;
+}
+
+.feedback-message-download {
+  margin-top: 10px;
+  color: #333;
+  font-size: 1rem;
+  font-weight: bold;
+}
