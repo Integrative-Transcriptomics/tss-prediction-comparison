@@ -82,7 +82,7 @@ TSS of forward and reverse files of a condition are predicted seperately but joi
 ## Contact
 If you encounter any problems using TSSplorer please feel free to create an issue or contact us via email: 
 
-markus.henkel@student.uni-tuebingen.de
+markus.henkel@student.uni-tuebingen.de, julian.borbeck@student.uni-tuebingen.de 
 
 
 
