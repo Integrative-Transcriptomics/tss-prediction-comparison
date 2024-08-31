@@ -26,11 +26,22 @@ Unlike TSSpredator TSSplorer only uses non-enriched data. This means that TSSplo
    - you can multiple forward and reverse files as technical replicates by selecting more files 
    - you can add more conditions by pressing the + button under the conditions
    - The mastertable of TSSpredator for the comparison
-   - The .gff-file for the TSS classification
-2. If you're done uploading all files first press the Start Prediction button. If the upload was succesful you get a blue feedback message under the button for confirmation
-3. once you get the blue feedback message press the Load Management Page button to look at the results 
-4. The results might not be ready at this point. Press the reload button to update the statuses of the uploaded files 
-5. Once finished you can download the result and visualize it by pressing the corresponding buttons.
+   - The .gff-file for the TSS classification  
+
+    Note: Selecting multiple files for the upload on your system
+    - Windows:
+       - Shift + Click: Click the first file, hold down the Shift key, then click the last file. All files between the first and last will be selected.
+       - Ctrl + Click: Hold down the Ctrl key, then click on each file you want to select individually.   
+    - macOS: 
+      - Shift + Click: Click the first file, hold down the Shift key, then click the last file to select a continuous range of files.
+      - Command (⌘) + Click: Hold down the Command (⌘) key, then click on each file you want to select individually.
+    - Linux: 
+      - Shift + Click: Click the first file, hold down the Shift key, then click the last file to select a range of files.
+      - Ctrl + Click: Hold down the Ctrl key, then click on each file you want to select individually.
+1. If you're done uploading all files first press the Start Prediction button. If the upload was succesful you get a blue feedback message under the button for confirmation
+2. once you get the blue feedback message press the Load Management Page button to look at the results 
+3. The results might not be ready at this point. Press the reload button to update the statuses of the uploaded files 
+4. Once finished you can download the result and visualize it by pressing the corresponding buttons.
 
 Remember that you're not limited to uploading just one project. Head back to the initial page and upload another project, the management page will show all projects that you have submitted while on the TSSplorer website. 
  
