@@ -4,6 +4,7 @@ import ConditionList from './ConditionList';
 import TssMasterTable from './TssMasterTable';
 import GFF from './GFF';
 import Feedback from './Feedback'; // Import the Feedback component to display error or success messages
+import HeaderWithTooltip from './HeaderWithTooltip';
 
 function ProjectForm() {
   // State variables to manage project name, conditions, feedback messages, and upload status
@@ -131,8 +132,10 @@ function ProjectForm() {
   return (
     <div className="project-form">
       <h1>TSSplorer</h1>
-      <p className="subheading">Comparison and visualization of predicted TSS in prokaryotes </p>
-      
+      <HeaderWithTooltip 
+          title="Comparison and visualization of predicted TSS in prokaryotes"
+          tooltipText="For an explanation of the tool please visit the GitHub Repository and read the Readme: https://github.com/Integrative-Transcriptomics/tss-prediction-comparison"
+        />
       {/* Input field for project name */}
       <div className="form-group">
         <label>Project Name:</label>
