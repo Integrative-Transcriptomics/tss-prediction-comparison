@@ -11,9 +11,9 @@ const HeaderWithTooltip = ({ title, tooltipText }) => (
     {/* Tooltip icon and text */}
     <div className="tooltip">
       <span className="tooltip-icon">?</span>
-      <span className="tooltip-text">
+      <div className="tooltip-text">
         {tooltipText}
-      </span>
+      </div>
     </div>
   </div>
 );
