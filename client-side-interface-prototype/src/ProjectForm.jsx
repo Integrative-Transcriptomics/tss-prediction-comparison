@@ -131,7 +131,7 @@ function ProjectForm() {
   return (
     <div className="project-form">
       <h1>TSSplorer</h1>
-      <p className="subheading">TSS prediction and comparison Tool</p>
+      <p className="subheading">Comparison and visualization of predicted TSS in prokaryotes </p>
       
       {/* Input field for project name */}
       <div className="form-group">
