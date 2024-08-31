@@ -9,13 +9,9 @@ def parse_gff_to_df(filepath):
     :return: df
     """
     column_names = ["seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes"]
-    df = pd.read_csv(filepath, sep='\t', comment='#', header=None,names=column_names)
+    df = pd.read_csv(filepath, sep='\t', comment='#', header=None, names=column_names)
     df = df[df['type'] == 'gene'].reset_index(drop=True)
-    try:
-        if df.empty:
-            raise GffFormatException("your GFF file doesnt contain any entries of type gene, no classification of TSS "
-                                     "possible")
-    except GffFormatException as e:
-        print(e)
-
+    if df.empty:
+        raise GffFormatException("your GFF file doesnt contain any entries of type gene, no classification of TSS "
+                                 "possible")
     return df

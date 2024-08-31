@@ -379,7 +379,7 @@ def get_common_by_id():
         condition = get_condition_by_id(id)
         if condition:
             try:
-                common_df = condition.get_combined_tss(jobRegistry)
+                common_df = condition.get_combined_common(jobRegistry)
                 response_object = df_to_response(common_df, "common_prediction.csv")
                 status_code = 200
             except NotReadyException as e:
