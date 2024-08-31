@@ -20,6 +20,9 @@ More on the biological backgrounds of transcription in prokaryotes in the [wiki]
 Unlike TSSpredator TSSplorer only uses non-enriched data. This means that TSSplorer deals with background noise that arises from data without certain highlighted features, patterns, or subsets of interest.
 
 ## How to install and run TSSplorer?
+Currently TSSplorer is not being hosted externally and therefore not accessible online.   
+
+To use TSSplorer through a local host do the following:  
 Set up the frontend and backend servers as described in the [wiki](https://github.com/Integrative-Transcriptomics/tss-prediction-comparison/wiki/How-to-set-up-the-server-on-your-device).  
 After a successful setup of the backend and frontend the full server can be launched using yarn by navigating to your project directory and running `yarn start`.
  
