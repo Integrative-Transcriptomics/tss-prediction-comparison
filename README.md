@@ -18,12 +18,16 @@ More on the biological backgrounds of transcription in prokaryotes in the [wiki]
 
 ## What distinguishes TSSplorer from other TSS prediction tools especially TSSpredator?
 Unlike TSSpredator TSSplorer only uses non-enriched data. This means that TSSplorer deals with background noise that arises from data without certain highlighted features, patterns, or subsets of interest.
+
+## How to install and run TSSplorer?
+Set up the frontend and backend servers as described in the [wiki](https://github.com/Integrative-Transcriptomics/tss-prediction-comparison/wiki/How-to-set-up-the-server-on-your-device).  
+After a successful setup of the backend and frontend the full server can be launched using yarn by navigating to your project directory and running `yarn start`.
  
 ## How to use TSSplorer?
 1. Input the following:
    - The name of your project (on the management site you will find your submission under this name)
    - your .wig-files of the forward and the reverse strand that were derived under the same condition (for example in an environment with 30°C)
-   - you can multiple forward and reverse files as technical replicates by selecting more files 
+   - you can submit multiple forward and reverse files as technical replicates by selecting more files. Keep in mind that the number of forward files must match the number of reverse files
    - you can add more conditions by pressing the + button under the conditions
    - The mastertable of TSSpredator for the comparison
    - The .gff-file for the TSS classification  
@@ -46,7 +50,19 @@ Unlike TSSpredator TSSplorer only uses non-enriched data. This means that TSSplo
 Remember that you're not limited to uploading just one project. Head back to the initial page and upload another project, the management page will show all projects that you have submitted while on the TSSplorer website. 
  
 ## Workflow
-Workflow will be added shortly.
+
+With given Input:
+
+- Conditions with forward and reverse files, Master-Table and GFF-file
+ 
+a prediction of possible TSS together with a confidence value are computed for each condition.  
+TSS of forward and reverse files of a condition are predicted seperately but joined in the end.
+
+1. technical replicates are merged together (f.e. multiple multiple forward files)
+2. TSS are predicted using a Random Forets Classifier based on "scikit learn"
+3. Classification of TSS is done with the GFF-file (classes are f.e. primary or secondary TSS)
+4. finding Common TSS of our predicted TSS and TSS of MasterTable (TSS of the MasterTable are the TSS of TSSpredator)
+5. common TSS of prediction for forward files and reverse files are joined and visualized in front end
 
 ## Languages and tools used in this project
 - Visualization: 
@@ -56,7 +72,10 @@ Workflow will be added shortly.
   - Language: JavaScript
   - Framework: React
 - Backend: 
-  - Python
+  - Language: Python
+  - Framework: Flask
+- TSS Prediction:
+  - Scikit-learn
 ## Contact
 If you encounter any problems using TSSplorer please feel free to create an issue or contact us via email: 
 
