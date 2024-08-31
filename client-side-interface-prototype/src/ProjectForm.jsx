@@ -134,8 +134,14 @@ function ProjectForm() {
       <h1>TSSplorer</h1>
       <HeaderWithTooltip 
           title="Comparison and visualization of predicted TSS in prokaryotes"
-          tooltipText="For an explanation of the tool please visit the GitHub Repository and read the Readme: https://github.com/Integrative-Transcriptomics/tss-prediction-comparison"
-        />
+          tooltipText={
+            <span>
+              For an explanation of the tool please visit the 
+              <a href="https://github.com/Integrative-Transcriptomics/tss-prediction-comparison" target="_blank" rel="noopener noreferrer"> GitHub Repository</a> 
+              &nbsp;and read the Readme.
+            </span>
+          }
+      />
       {/* Input field for project name */}
       <div className="form-group">
         <label>Project Name:</label>
