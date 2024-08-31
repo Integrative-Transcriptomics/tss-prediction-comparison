@@ -151,11 +151,6 @@ function JobManagement() {
     navigate(`/visualization/${conditionId}`);
   };
 
-  // function for refreshing the jobmanagement page
-  function refreshPage() {
-    window.location.reload();
-  }
-
   // Function to handle downloading project data
   const handleDownloadProject = async (projectId) => {
     try {
